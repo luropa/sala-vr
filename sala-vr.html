@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <title>Sala de Estudo com Lousa Interativa</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden; background: #fcefdc">
+    <a-scene cursor="rayOrigin: mouse">
+      <!-- Piso -->
+      <a-plane color="#e0cda9" height="10" width="10" rotation="-90 0 0"></a-plane>
+
+      <!-- Parede ao fundo -->
+      <a-plane color="#fdf6e3" height="5" width="10" position="0 2.5 -5"></a-plane>
+
+      <!-- Lousa branca -->
+      <a-plane id="lousa" color="#ffffff" height="2" width="3.5" position="0 2.5 -4.9" class="clickable"></a-plane>
+
+      <!-- Imagem exibida sobre a lousa -->
+      <a-image id="img-palavra"
+               src="palavraninho.png"
+               width="2.5"
+               height="1"
+               position="0 2.5 -4.88"
+               visible="false">
+      </a-image>
+
+      <!-- Câmera -->
+      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+      <a-entity cursor="rayOrigin: mouse"></a-entity>
+    </a-scene>
+
+    <script>
+      const lousa = document.querySelector('#lousa');
+      const imagem = document.querySelector('#img-palavra');
+
+      lousa.addEventListener('click', () => {
+        imagem.setAttribute('visible', true);
+      });
+    </script>
+  </body>
+</html>
+
