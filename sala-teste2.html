@@ -267,7 +267,9 @@
         startY - 2 * espacamentoY,
         () => {
           let textoAtual = textoDigitado.getAttribute('value');
-          textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
+          if (textoAtual.length > 0) {
+            textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
+          }
         },
         corTecla,
         opacidadeTecla
@@ -285,26 +287,15 @@
             imagem.setAttribute('width', '0.8');
             imagem.setAttribute('height', '1.2');
             imagem.setAttribute('position', '0 3 -4.8');
-            textoDigitado.setAttribute('visible', false);
           } else {
             imagem.setAttribute('src', '#img-estrela-triste');
             imagem.setAttribute('material', 'transparent: true');
             imagem.setAttribute('width', '1.7');
             imagem.setAttribute('height', '1.5');
             imagem.setAttribute('position', '0 3 -4.8');
-            // Mantém o texto visível para o usuário continuar digitando
-            // textoDigitado.setAttribute('visible', true);
-
-            // Opcional: pode limpar texto após 3s para nova tentativa
-            setTimeout(() => {
-              imagem.setAttribute('src', '#img-ninho');
-              imagem.setAttribute('width', tamanhoOriginal.width.toString());
-              imagem.setAttribute('height', tamanhoOriginal.height.toString());
-              imagem.setAttribute('position', '0 3 -4.9');
-              textoDigitado.setAttribute('value', '');
-              textoDigitado.setAttribute('visible', true);
-            }, 3000);
           }
+          // Apaga todo o texto digitado ao clicar em Entrar
+          textoDigitado.setAttribute('value', '');
         },
         corTecla,
         opacidadeTecla
