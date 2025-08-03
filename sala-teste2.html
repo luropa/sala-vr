@@ -1,138 +1,153 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <title>Sala de Estudo VR</title>
-    <meta name="description" content="Experiência de digitação com gaze" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script>
-      AFRAME.registerComponent("gaze-activate-move", {
-        schema: {
-          target: { type: "selector" },
-        },
-        init: function () {
-          this.el.addEventListener("click", () => {
-            if (this.moved || !this.data.target) return;
+<head>
+  <meta charset="utf-8" />
+  <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+</head>
+<body>
+  <a-scene>
+    <!-- Assets -->
+    <a-assets>
+      <img id="img-ninho" src="ninho.png" />
+      <img id="img-lousa" src="lousa.png" />
+    </a-assets>
 
-            this.moved = true;
-            const camera = this.data.target.object3D;
-            const lousa = this.el.object3D;
+    <!-- Rig com câmera -->
+    <a-entity id="cameraRig" position="0 1.6 4" gaze-move-controller>
+      <a-camera wasd-controls-enabled="false"></a-camera>
+    </a-entity>
 
-            this.direction = new THREE.Vector3();
-            this.direction.subVectors(lousa.position, camera.position).normalize();
-            this.speed = 0.02;
-            this.limiteDistancia = 1.5;
-            this.moving = true;
+    <!-- Lousa com componente de ativação -->
+    <a-plane id="lousa" src="#img-lousa" position="0 2 -5" width="4" height="3"></a-plane>
 
-            this.tick = () => {
-              if (!this.moving) return;
+    <!-- Palavra "ninho" (inicialmente invisível) -->
+    <a-image id="imagem-ninho" visible="false"></a-image>
 
-              const distance = camera.position.distanceTo(lousa.position);
-              if (distance > this.limiteDistancia) {
-                camera.position.addScaledVector(this.direction, this.speed);
-              } else {
-                this.moving = false;
-                document.querySelector("#teclado").setAttribute("visible", true);
-                document.querySelector("#campoTexto").setAttribute("visible", true);
-                document.querySelector("#palavraNinho").setAttribute("visible", true);
-              }
-            };
-          });
-        },
-      });
+    <!-- Texto digitado -->
+    <a-text id="texto-digitado" value="" position="0 1.2 -4.9" align="center" width="4" color="black" visible="false"></a-text>
 
-      AFRAME.registerComponent("verificar-palavra", {
-        init: function () {
-          this.el.addEventListener("click", () => {
-            const texto = document.querySelector("#campoTexto");
-            const valor = texto.getAttribute("value").toLowerCase();
-            const estrelaContente = document.querySelector("#estrelaContente");
-            const estrelaTriste = document.querySelector("#estrelaTriste");
+    <!-- Teclado invisível (ativado ao se aproximar da lousa) -->
+    <a-entity id="teclado" visible="false">
+      <!-- Exemplo de letras -->
+      <a-plane letra="N" position="-1 0 -4.8" width="0.3" height="0.3" color="white">
+        <a-text value="N" align="center" color="black" position="0 0 0.01"></a-text>
+      </a-plane>
+      <a-plane letra="I" position="-0.5 0 -4.8" width="0.3" height="0.3" color="white">
+        <a-text value="I" align="center" color="black" position="0 0 0.01"></a-text>
+      </a-plane>
+      <a-plane letra="N" position="0 0 -4.8" width="0.3" height="0.3" color="white">
+        <a-text value="N" align="center" color="black" position="0 0 0.01"></a-text>
+      </a-plane>
+      <a-plane letra="H" position="0.5 0 -4.8" width="0.3" height="0.3" color="white">
+        <a-text value="H" align="center" color="black" position="0 0 0.01"></a-text>
+      </a-plane>
+      <a-plane letra="O" position="1 0 -4.8" width="0.3" height="0.3" color="white">
+        <a-text value="O" align="center" color="black" position="0 0 0.01"></a-text>
+      </a-plane>
+    </a-entity>
+  </a-scene>
 
-            if (valor === "ninho") {
-              estrelaContente.setAttribute("visible", true);
-              setTimeout(() => estrelaContente.setAttribute("visible", false), 5000);
-            } else {
-              estrelaTriste.setAttribute("visible", true);
-              setTimeout(() => estrelaTriste.setAttribute("visible", false), 5000);
-            }
+  <script>
+    AFRAME.registerComponent('gaze-move-controller', {
+      schema: { speed: { type: 'number', default: 1.5 } },
+      init: function () {
+        this.direction = new THREE.Vector3();
+        this.moving = false;
+        this.cameraEl = this.el.querySelector('a-camera');
+        this.aproximado = false;
+      },
+      tick: function (time, deltaTime) {
+        if (!this.moving || this.aproximado) return;
 
-            texto.setAttribute("value", "");
-          });
-        },
-      });
+        const rig = this.el;
+        const lousa = document.querySelector('#lousa');
+        const camPos = rig.object3D.position;
+        const lousaPos = lousa.object3D.position;
 
-      function adicionarLetra(letra) {
-        const texto = document.querySelector("#campoTexto");
-        const atual = texto.getAttribute("value");
-        if (!atual.includes(letra)) {
-          texto.setAttribute("value", atual + letra);
+        this.cameraEl.object3D.getWorldDirection(this.direction);
+        this.direction.y = 0;
+        this.direction.normalize();
+
+        const dx = camPos.x - lousaPos.x;
+        const dz = camPos.z - lousaPos.z;
+        const distXZ = Math.sqrt(dx * dx + dz * dz);
+        const limiteDistancia = 1.5;
+
+        if (distXZ > limiteDistancia) {
+          const delta = this.data.speed * (deltaTime / 1000);
+          const moveVector = this.direction.clone().multiplyScalar(-delta);
+          const novaX = camPos.x + moveVector.x;
+          const novaZ = camPos.z + moveVector.z;
+
+          const novaDistXZ = Math.sqrt(
+            (novaX - lousaPos.x) ** 2 + (novaZ - lousaPos.z) ** 2
+          );
+
+          if (novaDistXZ <= limiteDistancia) {
+            const dirParaLousa = new THREE.Vector3(
+              lousaPos.x - camPos.x,
+              0,
+              lousaPos.z - camPos.z
+            ).normalize();
+
+            rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
+            rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
+
+            this.aproximado = true;
+          } else {
+            rig.object3D.position.x = novaX;
+            rig.object3D.position.z = novaZ;
+          }
         }
       }
-    </script>
-  </head>
-  <body>
-    <a-scene>
-      <!-- Câmera e cursor gaze -->
-      <a-entity id="cameraRig">
-        <a-camera position="0 1.6 4">
-          <a-cursor
-            fuse="true"
-            fuse-timeout="2000"
-            material="color: red; shader: flat"
-          ></a-cursor>
-        </a-camera>
-      </a-entity>
+    });
 
-      <!-- Lousa com comportamento de mover-se até ela -->
-      <a-plane id="lousa" gaze-activate-move="target: #cameraRig"
-        position="0 2 -3" width="3" height="2" color="#333">
-      </a-plane>
+    AFRAME.registerComponent('gaze-activate-move', {
+      init: function () {
+        const rig = document.querySelector('#cameraRig');
+        this.timeout = null;
 
-      <!-- Palavra "ninho" -->
-      <a-text id="palavraNinho" value="ninho" position="0 2.8 -3"
-        align="center" width="4" visible="false"></a-text>
+        this.el.addEventListener('mouseenter', () => {
+          this.timeout = setTimeout(() => {
+            if (rig.components['gaze-move-controller']) {
+              rig.components['gaze-move-controller'].moving = true;
+            }
 
-      <!-- Campo de texto -->
-      <a-text id="campoTexto" value="" position="0 2.3 -3" align="center"
-        width="4" color="white" visible="false"></a-text>
+            const imagem = document.querySelector('#imagem-ninho');
+            const textoDigitado = document.querySelector('#texto-digitado');
+            const teclado = document.querySelector('#teclado');
+            const tamanhoOriginal = { width: 1, height: 0.5 };
 
-      <!-- Teclado -->
-      <a-entity id="teclado" visible="false">
-        <a-box position="-1 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
-          onclick="adicionarLetra('n')"></a-box>
-        <a-box position="-0.6 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
-          onclick="adicionarLetra('i')"></a-box>
-        <a-box position="-0.2 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
-          onclick="adicionarLetra('h')"></a-box>
-        <a-box position="0.2 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
-          onclick="adicionarLetra('o')"></a-box>
-        <a-box id="btnEnter" position="0.8 1.7 -3" depth="0.1" height="0.3" width="0.5" color="green"
-          verificar-palavra></a-box>
-      </a-entity>
+            imagem.setAttribute('visible', true);
+            imagem.setAttribute('src', '#img-ninho');
+            imagem.setAttribute('width', tamanhoOriginal.width.toString());
+            imagem.setAttribute('height', tamanhoOriginal.height.toString());
+            imagem.setAttribute('position', '0 3 -4.9');
 
-      <!-- Estrela contente -->
-      <a-image id="estrelaContente" src="#estrelaContenteImg" position="0 2.5 -3"
-        width="1" height="1" visible="false"></a-image>
+            textoDigitado.setAttribute('visible', true);
+            textoDigitado.setAttribute('value', '');
 
-      <!-- Estrela triste -->
-      <a-image id="estrelaTriste" src="#estrelaTristeImg" position="0 2.5 -3"
-        width="1" height="1" visible="false"></a-image>
+            teclado.setAttribute('visible', true);
+          }, 2000);
+        });
 
-      <!-- Imagens usadas -->
-      <a-assets>
-        <img id="estrelaContenteImg" src="estrela-contente.png">
-        <img id="estrelaTristeImg" src="estrela-triste.png">
-      </a-assets>
+        this.el.addEventListener('mouseleave', () => {
+          clearTimeout(this.timeout);
+          if (rig.components['gaze-move-controller']) {
+            rig.components['gaze-move-controller'].moving = false;
+          }
+        });
+      }
+    });
 
-      <!-- Elementos adicionais do ambiente -->
-      <a-box position="2 0.5 -3" width="0.5" height="1" depth="0.5" color="#FFC65D"></a-box>
-      <a-sphere position="-2 0.5 -3" radius="0.5" color="#EF2D5E"></a-sphere>
-      <a-plane position="0 0 -4" width="10" height="10" rotation="-90 0 0" color="#7BC8A4"></a-plane>
-
-      <!-- Interruptor e outros elementos do usuário -->
-      <a-box position="-1.5 1.5 -2.9" width="0.2" height="0.4" depth="0.05" color="#999"></a-box>
-      <a-box position="1.5 1.5 -2.9" width="1" height="1" depth="0.05" color="#fff"></a-box> <!-- Janela -->
-    </a-scene>
-  </body>
+    document.addEventListener('DOMContentLoaded', () => {
+      const lousa = document.querySelector('#lousa');
+      if (lousa) {
+        lousa.setAttribute('gaze-activate-move', '');
+      }
+    });
+  </script>
+</body>
 </html>
