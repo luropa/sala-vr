@@ -2,141 +2,175 @@
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
-    <title>Sala com Teclado VR</title>
+    <title>Sala de Estudo com Teclado Virtual</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
     <script>
-      AFRAME.registerComponent("move-camera", {
+      let userMoved = false;
+      let camera;
+      let originalPosition;
+      let enteredText = '';
+      let textEntity;
+      let keyboard;
+      let inputAllowed = true;
+
+      AFRAME.registerComponent('init-scene', {
         init: function () {
-          const el = this.el;
-          let moved = false;
-          el.addEventListener("fusing", () => {
-            if (!moved) {
-              moved = true;
-              el.setAttribute("animation__move", {
-                property: "position",
-                to: "0 1.6 -4.5",
-                dur: 2000,
-                easing: "easeInOutQuad",
-              });
-              setTimeout(() => {
-                document.querySelector("#keyboard").setAttribute("visible", true);
-                document.querySelector("#inputText").setAttribute("visible", true);
-                document.querySelector("#ninho-text").setAttribute("visible", true);
-              }, 2000);
-            }
-          });
-        },
+          camera = document.querySelector('[camera]');
+          originalPosition = camera.getAttribute('position');
+          textEntity = document.querySelector('#textInput');
+          keyboard = document.querySelector('#keyboard');
+          keyboard.setAttribute('visible', false);
+        }
       });
 
-      let inputText = "";
-
-      function updateText() {
-        document.querySelector("#inputText").setAttribute("value", inputText);
-      }
-
-      function handleKey(letter) {
-        if (inputText.length < 10 && !document.querySelector("#star-happy").getAttribute("visible")) {
-          inputText += letter;
-          updateText();
+      AFRAME.registerComponent('activate-on-gaze', {
+        init: function () {
+          this.el.addEventListener('click', () => {
+            if (!userMoved) {
+              moveToLousa();
+            }
+          });
         }
+      });
+
+      function moveToLousa() {
+        const cameraRig = document.querySelector('#cameraRig');
+        cameraRig.setAttribute('animation__move', {
+          property: 'position',
+          to: '0 1.6 -4.5',
+          dur: 2000,
+          easing: 'easeInOutQuad'
+        });
+
+        setTimeout(() => {
+          showKeyboard();
+        }, 2100);
+
+        userMoved = true;
       }
 
-      function handleBackspace() {
-        inputText = inputText.slice(0, -1);
+      function showKeyboard() {
+        document.querySelector('#textInput').setAttribute('visible', true);
+        document.querySelector('#keyboard').setAttribute('visible', true);
+        inputAllowed = true;
+      }
+
+      function hideKeyboard() {
+        document.querySelector('#textInput').setAttribute('visible', false);
+        document.querySelector('#keyboard').setAttribute('visible', false);
+        inputAllowed = false;
+      }
+
+      function addLetter(letter) {
+        if (!inputAllowed) return;
+        enteredText += letter;
         updateText();
       }
 
-      function handleEnter() {
-        const happyStar = document.querySelector("#star-happy");
-        const sadStar = document.querySelector("#star-sad");
-        const keyboard = document.querySelector("#keyboard");
-        const inputField = document.querySelector("#inputText");
+      function eraseLetter() {
+        if (!inputAllowed) return;
+        enteredText = enteredText.slice(0, -1);
+        updateText();
+      }
 
-        keyboard.setAttribute("visible", false);
-        inputField.setAttribute("visible", false);
+      function updateText() {
+        textEntity.setAttribute('value', enteredText);
+      }
 
-        if (inputText.toLowerCase() === "ninho") {
-          happyStar.setAttribute("visible", true);
+      function submitWord() {
+        if (!inputAllowed) return;
+
+        hideKeyboard();
+
+        if (enteredText.toLowerCase() === 'ninho') {
+          showStar('happy');
           setTimeout(() => {
-            happyStar.setAttribute("visible", false);
-            inputText = "";
+            document.querySelector('#happyStar').setAttribute('visible', false);
+            enteredText = '';
             updateText();
-            document.querySelector("#ninho-text").setAttribute("visible", false);
           }, 2000);
         } else {
-          sadStar.setAttribute("visible", true);
+          showStar('sad');
           setTimeout(() => {
-            sadStar.setAttribute("visible", false);
-            inputText = "";
+            document.querySelector('#sadStar').setAttribute('visible', false);
+            enteredText = '';
             updateText();
-            keyboard.setAttribute("visible", true);
-            inputField.setAttribute("visible", true);
+            showKeyboard();
           }, 2000);
         }
+      }
+
+      function showStar(type) {
+        const star = document.querySelector(`#${type}Star`);
+        star.setAttribute('visible', true);
       }
     </script>
   </head>
   <body>
-    <a-scene>
-      <!-- Fundo da sala e luz -->
-      <a-plane position="0 0 -5" width="20" height="20" color="#ECECEC" rotation="-90 0 0"></a-plane>
-      <a-sky color="#FFF"></a-sky>
-      <a-light type="ambient" color="#ccc"></a-light>
+    <a-scene init-scene>
+      <!-- Câmera com cursor -->
+      <a-entity id="cameraRig" position="0 1.6 0">
+        <a-entity camera look-controls>
+          <a-entity
+            cursor="fuse: true; fuseTimeout: 2000"
+            position="0 0 -1"
+            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+            material="color: red; shader: flat"
+          ></a-entity>
+        </a-entity>
+      </a-entity>
 
       <!-- Lousa -->
-      <a-plane id="board" position="0 2 -5" width="4" height="2" color="#2c3e50" look-at="#camera">
-        <a-text id="ninho-text" value="ninho" position="0 0.8 0.01" align="center" color="white" visible="false" width="4"></a-text>
-        <a-text id="inputText" value="" position="0 0.4 0.01" align="center" color="white" visible="false" width="4"></a-text>
-        <a-image id="star-happy" src="#happyStar" position="0 0 0.01" width="0.8" height="0.8" visible="false"></a-image>
-        <a-image id="star-sad" src="#sadStar" position="0 0 0.01" width="0.8" height="0.8" visible="false"></a-image>
-      </a-plane>
+      <a-plane position="0 2 -6" rotation="-10 0 0" width="4" height="2.5" color="#333" activate-on-gaze></a-plane>
+
+      <!-- Texto digitado -->
+      <a-entity
+        id="textInput"
+        position="0 2.8 -6"
+        text="value: ; color: white; align: center; width: 4"
+        visible="false"
+      ></a-entity>
 
       <!-- Teclado -->
       <a-entity id="keyboard" visible="false">
-        <a-entity position="-1 1 -4.9">
-          <a-plane color="#FFF" height="0.5" width="3" opacity="0.4"></a-plane>
-          <a-text value="A B C D E F G H I J" position="-1.4 0.15 0" color="black" width="3"></a-text>
-          <a-text value="K L M N O P Q R S T" position="-1.4 0 0" color="black" width="3"></a-text>
-          <a-text value="U V W X Y Z" position="-1.4 -0.15 0" color="black" width="3"></a-text>
-          <!-- Letras interativas -->
-          <a-entity id="letters" position="-1.35 0.15 0.01">
-            <!-- Cada letra -->
-            <a-text value="A" position="0 0 0" @click="handleKey('A')" color="black"></a-text>
-            <!-- (adicione outras letras semelhantes aqui como B, C, etc., com espaçamento adequado) -->
-          </a-entity>
-          <!-- Botões -->
-          <a-box position="2.3 -0.15 0.01" color="red" depth="0.1" height="0.2" width="0.4" onclick="handleBackspace()">
-            <a-text value="Apagar" position="-0.18 0 0.05" width="1" color="white"></a-text>
-          </a-box>
-          <a-box position="2.3 0.15 0.01" color="green" depth="0.1" height="0.2" width="0.4" onclick="handleEnter()">
-            <a-text value="Entrar" position="-0.18 0 0.05" width="1" color="white"></a-text>
-          </a-box>
+        <a-plane position="0 1.5 -6" width="3" height="1.5" color="#111"></a-plane>
+
+        <!-- Letras -->
+        <a-entity id="letters">
+          <a-plane position="-1 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: N; align: center" 
+                   onclick="addLetter('N')"></a-plane>
+
+          <a-plane position="-0.5 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: I; align: center"
+                   onclick="addLetter('I')"></a-plane>
+
+          <a-plane position="0 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: H; align: center"
+                   onclick="addLetter('H')"></a-plane>
+
+          <a-plane position="0.5 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: O; align: center"
+                   onclick="addLetter('O')"></a-plane>
         </a-entity>
+
+        <!-- Botão Apagar -->
+        <a-plane position="-0.75 1.5 -6" width="0.6" height="0.3" color="#FF6347" text="value: Apagar; align: center"
+                 onclick="eraseLetter()"></a-plane>
+
+        <!-- Botão Entrar -->
+        <a-plane position="0.75 1.5 -6" width="0.6" height="0.3" color="#32CD32" text="value: Entrar; align: center"
+                 onclick="submitWord()"></a-plane>
       </a-entity>
 
-      <!-- Imagens das estrelas -->
+      <!-- Estrela feliz -->
+      <a-image id="happyStar" src="#happy" position="0 2.5 -6" width="1" height="1" visible="false"></a-image>
+
+      <!-- Estrela triste -->
+      <a-image id="sadStar" src="#sad" position="0 2.5 -6" width="1" height="1" visible="false"></a-image>
+
+      <!-- Assets das estrelas -->
       <a-assets>
-        <img id="happyStar" src="estrela_contente.png" />
-        <img id="sadStar" src="estrela_triste.png" />
+        <img id="happy" src="estrela_contente.png">
+        <img id="sad" src="estrela_triste.png">
       </a-assets>
-
-      <!-- Câmera e cursor -->
-      <a-entity id="cameraRig">
-        <a-entity id="camera" camera look-controls position="0 1.6 0">
-          <a-cursor
-            fuse="true"
-            fuse-timeout="2000"
-            material="color: red; shader: flat"
-            position="0 0 -1"
-            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-            move-camera
-          ></a-cursor>
-        </a-entity>
-      </a-entity>
-
-      <!-- Outros elementos da sala que você já tinha -->
-      <!-- Adicione aqui o Beto, letras flutuantes, livros, etc. sem alterações -->
     </a-scene>
   </body>
 </html>
