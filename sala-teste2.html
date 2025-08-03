@@ -16,15 +16,9 @@
         this.direction = new THREE.Vector3();
         this.moving = false;
         this.cameraEl = this.el.querySelector('a-camera');
-        this.aproximado = false; // trava a aproximação após chegar a 50cm
       },
       tick: function (time, deltaTime) {
         if (!this.moving) return;
-
-        if (this.aproximado) {
-          // Já está na posição limite, não permite mais movimento de aproximação
-          return;
-        }
 
         const rig = this.el;
         const lousa = document.querySelector('#lousa');
@@ -33,30 +27,32 @@
         const lousaPos = lousa.object3D.position;
 
         this.cameraEl.object3D.getWorldDirection(this.direction);
-        this.direction.y = 0; // impede movimento vertical
+        this.direction.y = 0;
         this.direction.normalize();
 
-        // Distância horizontal (X,Z)
+        // Calcula distância atual no plano XZ
         const dx = camPos.x - lousaPos.x;
         const dz = camPos.z - lousaPos.z;
         const distXZ = Math.sqrt(dx * dx + dz * dz);
 
-        const limiteDistancia = 1.5; // 1,5 metros
+        const limiteDistancia = 1.5; // alterado para 1,5 metros
 
         if (distXZ > limiteDistancia) {
           const delta = this.data.speed * (deltaTime / 1000);
           const moveVector = this.direction.clone().multiplyScalar(-delta);
 
+          // Posição nova proposta
           const novaX = camPos.x + moveVector.x;
           const novaZ = camPos.z + moveVector.z;
 
+          // Distância nova depois do movimento
           const novaDistXZ = Math.sqrt(
             (novaX - lousaPos.x) * (novaX - lousaPos.x) +
             (novaZ - lousaPos.z) * (novaZ - lousaPos.z)
           );
 
           if (novaDistXZ <= limiteDistancia) {
-            // Ajusta exatamente para 1,5 m da lousa
+            // Posiciona exatamente a 1,5 m da lousa
             const dirParaLousa = new THREE.Vector3(
               lousaPos.x - camPos.x,
               0,
@@ -65,8 +61,6 @@
 
             rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
             rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
-
-            this.aproximado = true; // bloqueia movimentos futuros de aproximação
           } else {
             rig.object3D.position.x = novaX;
             rig.object3D.position.z = novaZ;
@@ -86,7 +80,7 @@
               rig.components['gaze-move-controller'].moving = true;
             }
 
-            // Mostrar palavra, cursor e teclado ao iniciar movimento
+            // Mostrar palavra e teclado ao iniciar movimento
             const imagem = document.querySelector('#imagem-ninho');
             const textoDigitado = document.querySelector('#texto-digitado');
             const teclado = document.querySelector('#teclado');
@@ -100,19 +94,19 @@
             imagem.setAttribute('height', tamanhoOriginal.height.toString());
             imagem.setAttribute('position', '0 3 -4.9');
             teclado.setAttribute('visible', true);
-          }, 2000);
+          }, 2000); // 2 segundos fixando olhar ativa movimento
         });
 
         this.el.addEventListener('mouseleave', () => {
           clearTimeout(this.timeout);
           if (rig.components['gaze-move-controller']) {
             rig.components['gaze-move-controller'].moving = false;
-            // NÃO resetamos rig.components['gaze-move-controller'].aproximado para manter travamento
           }
         });
       }
     });
 
+    // Aplica o componente à lousa após DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       const lousa = document.querySelector('#lousa');
       if (lousa) {
@@ -368,23 +362,89 @@
 
         const letraText = document.createElement('a-text');
         letraText.setAttribute('value', letra);
-        letraText.setAttribute('color', 'black');
+        letraText.setAttribute('color', '#000');
         letraText.setAttribute('align', 'center');
-        letraText.setAttribute('position', '0 0 0.01');
-        letraText.setAttribute('width', '0.3');
+        letraText.setAttribute('width', '2');
+        letraText.setAttribute('position', '0 0 0.02');
 
         plano.appendChild(letraText);
 
         plano.addEventListener('click', () => {
-          // Atualiza texto sem letras duplicadas
-          const valorAtual = textoDigitado.getAttribute('value');
-          if (!valorAtual.includes(letra)) {
-            textoDigitado.setAttribute('value', valorAtual + letra);
+          let textoAtual = textoDigitado.getAttribute('value');
+          if (!textoAtual.endsWith(letra)) {
+            textoDigitado.setAttribute('value', textoAtual + letra);
           }
         });
 
         teclado.appendChild(plano);
       });
+
+      criarBotaoExtra(
+        'Apagar',
+        -1,
+        startY - 2 * espacamentoY,
+        () => {
+          let textoAtual = textoDigitado.getAttribute('value');
+          textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
+        },
+        corTecla,
+        opacidadeTecla
+      );
+
+      criarBotaoExtra(
+        'Entrar',
+        1,
+        startY - 2 * espacamentoY,
+        () => {
+          const texto = textoDigitado.getAttribute('value').trim().toUpperCase();
+
+          if (texto === 'NINHO') {
+            imagem.setAttribute('src', '#img-estrela');
+            imagem.setAttribute('width', '0.8');
+            imagem.setAttribute('height', '1.2');
+            imagem.setAttribute('position', '0 3 -4.8');
+            textoDigitado.setAttribute('visible', false);
+          } else {
+            imagem.setAttribute('src', '#img-estrela-triste');
+            imagem.setAttribute('material', 'transparent: true');
+            imagem.setAttribute('width', '1.7');
+            imagem.setAttribute('height', '1.5');
+            imagem.setAttribute('position', '0 3 -4.8');
+            textoDigitado.setAttribute('visible', false);
+
+            setTimeout(() => {
+              imagem.setAttribute('src', '#img-ninho');
+              imagem.setAttribute('width', tamanhoOriginal.width.toString());
+              imagem.setAttribute('height', tamanhoOriginal.height.toString());
+              imagem.setAttribute('position', '0 3 -4.9');
+              textoDigitado.setAttribute('value', '');
+              textoDigitado.setAttribute('visible', true);
+            }, 3000);
+          }
+        },
+        corTecla,
+        opacidadeTecla
+      );
+    }
+
+    function criarBotaoExtra(texto, x, y, callback, cor, opacidade) {
+      const plano = document.createElement('a-plane');
+      plano.setAttribute('width', 1);
+      plano.setAttribute('height', 0.3);
+      plano.setAttribute('color', cor);
+      plano.setAttribute('opacity', opacidade);
+      plano.setAttribute('position', `${x} ${y} -4.9`);
+
+      const textoEntity = document.createElement('a-text');
+      textoEntity.setAttribute('value', texto);
+      textoEntity.setAttribute('align', 'center');
+      textoEntity.setAttribute('color', '#000');
+      textoEntity.setAttribute('width', '2');
+      textoEntity.setAttribute('position', '0 0 0.02');
+
+      plano.appendChild(textoEntity);
+      plano.addEventListener('click', callback);
+      teclado.appendChild(plano);
     }
   </script>
 </body>
