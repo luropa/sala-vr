@@ -1,178 +1,128 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <title>Sala de Estudo VR</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script>
-      AFRAME.registerComponent("olhar-lousa", {
-        init: function () {
-          const el = this.el;
-          let olhando = false;
-          let tempoOlhar = 0;
-          let jaAproximou = false;
-
-          this.tick = function (time, deltaTime) {
-            if (el.is("olhando")) {
-              if (!olhando) {
-                olhando = true;
-                tempoOlhar = 0;
-              } else {
-                tempoOlhar += deltaTime;
-                if (tempoOlhar > 2000 && !jaAproximou) {
-                  jaAproximou = true;
-                  aproximarCamera();
-                  mostrarElementos();
-                }
-              }
-            } else {
-              olhando = false;
-              tempoOlhar = 0;
-            }
-          };
-
-          function aproximarCamera() {
-            const camera = document.querySelector("[camera]");
-            const lousa = document.querySelector("#lousa");
-            const posLousa = lousa.object3D.position;
-            const dir = new THREE.Vector3().subVectors(posLousa, camera.object3D.position).normalize();
-            const novaPosicao = new THREE.Vector3().copy(posLousa).addScaledVector(dir, -1.5);
-            camera.setAttribute("position", novaPosicao);
-          }
-
-          function mostrarElementos() {
-            document.querySelector("#teclado").setAttribute("visible", true);
-            document.querySelector("#campoTexto").setAttribute("visible", true);
-            document.querySelector("#palavraNinho").setAttribute("visible", true);
-            document.querySelector("#cursor").setAttribute("visible", true);
-          }
-        },
-      });
-
-      AFRAME.registerComponent("interacao-lousa", {
-        init: function () {
-          const lousa = this.el;
-          lousa.addEventListener("mouseenter", () => lousa.addState("olhando"));
-          lousa.addEventListener("mouseleave", () => lousa.removeState("olhando"));
-        },
-      });
-
-      function verificarPalavra() {
-        const texto = document.querySelector("#campoTexto").getAttribute("value").toLowerCase();
-        const estrelaFeliz = document.querySelector("#estrelaFeliz");
-        const estrelaTriste = document.querySelector("#estrelaTriste");
-
-        if (texto === "ninho") {
-          estrelaFeliz.setAttribute("visible", true);
-          setTimeout(() => estrelaFeliz.setAttribute("visible", false), 5000);
-        } else {
-          estrelaTriste.setAttribute("visible", true);
-          setTimeout(() => estrelaTriste.setAttribute("visible", false), 5000);
-        }
-      }
-
-      function adicionarLetra(letra) {
-        const campo = document.querySelector("#campoTexto");
-        const textoAtual = campo.getAttribute("value");
-        if (textoAtual.length < 10) {
-          campo.setAttribute("value", textoAtual + letra);
-        }
-      }
-
-      function criarTecla(letra, x, y) {
-        const cena = document.querySelector("a-scene");
-        const tecla = document.createElement("a-plane");
-        tecla.setAttribute("color", "#CCC");
-        tecla.setAttribute("width", "0.3");
-        tecla.setAttribute("height", "0.3");
-        tecla.setAttribute("position", `${x} ${y} -2`);
-        tecla.setAttribute("text", `value: ${letra.toUpperCase()}; align: center; color: black`);
-        tecla.setAttribute("class", "interactable");
-        tecla.addEventListener("click", () => adicionarLetra(letra));
-        cena.appendChild(tecla);
-      }
-
-      window.addEventListener("DOMContentLoaded", () => {
-        const letras = "abcdefghijklmnopqrstuvwxyz";
-        let x = -2;
-        let y = 1.5;
-        letras.split("").forEach((letra, index) => {
-          criarTecla(letra, x, y);
-          x += 0.35;
-          if ((index + 1) % 10 === 0) {
-            x = -2;
-            y -= 0.4;
-          }
-        });
-
-        const enter = document.createElement("a-plane");
-        enter.setAttribute("color", "#6C6");
-        enter.setAttribute("width", "1");
-        enter.setAttribute("height", "0.3");
-        enter.setAttribute("position", `0 -0.2 -2`);
-        enter.setAttribute("text", "value: ENTRAR; align: center; color: white");
-        enter.addEventListener("click", verificarPalavra);
-        document.querySelector("a-scene").appendChild(enter);
-      });
-    </script>
-  </head>
-  <body>
-    <a-scene>
-      <!-- Câmera com cursor -->
-      <a-entity camera position="0 1.6 4">
-        <a-entity
+<head>
+  <meta charset="utf-8" />
+  <title>Sala de Estudo VR</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+</head>
+<body>
+  <a-scene>
+    <!-- Câmera com cursor de gaze -->
+    <a-entity id="cameraRig" position="0 1.6 4">
+      <a-camera id="camera">
+        <a-cursor
           id="cursor"
-          cursor="fuse: true; fuseTimeout: 2000"
-          position="0 0 -1"
-          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-          material="color: red; shader: flat"
-          visible="false"
-        ></a-entity>
-      </a-entity>
+          color="red"
+          fuse="true"
+          fuse-timeout="2000">
+        </a-cursor>
+      </a-camera>
+    </a-entity>
 
-      <!-- Lousa -->
-      <a-plane
-        id="lousa"
-        interacao-lousa
-        olhar-lousa
-        position="0 1.6 -2"
-        rotation="0 0 0"
-        width="3"
-        height="2"
-        color="#222"
-      ></a-plane>
+    <!-- Lousa -->
+    <a-box id="lousa" position="0 1.6 -4" width="3" height="2" depth="0.1" color="#333"></a-box>
 
-      <!-- Palavra "ninho" -->
-      <a-text
-        id="palavraNinho"
-        value="ninho"
-        align="center"
-        position="0 2.4 -2"
-        color="white"
-        width="4"
-        visible="false"
-      ></a-text>
+    <!-- Palavra "ninho" (inicialmente oculta) -->
+    <a-entity id="palavra" text="value: NINHO; align: center; color: white; width: 4" position="0 2.6 -4" visible="false"></a-entity>
 
-      <!-- Campo de texto -->
-      <a-text
-        id="campoTexto"
-        value=""
-        align="center"
-        position="0 1 -2"
-        color="white"
-        width="4"
-        visible="false"
-      ></a-text>
+    <!-- Teclado virtual -->
+    <a-entity id="teclado" position="0 1 -3.5" visible="false">
+      <!-- Letras do teclado -->
+      <a-box letra="N" position="-1 0 0" color="#AAF"></a-box>
+      <a-box letra="I" position="-0.5 0 0" color="#AFA"></a-box>
+      <a-box letra="H" position="0 0 0" color="#FAA"></a-box>
+      <a-box letra="O" position="0.5 0 0" color="#FFA"></a-box>
+      <!-- Botão "Entrar" -->
+      <a-box id="entrar" position="1.5 0 0" color="green"></a-box>
+    </a-entity>
 
-      <!-- Estrelas -->
-      <a-image id="estrelaFeliz" src="#feliz" position="0 2 -2" visible="false" width="1" height="1"></a-image>
-      <a-image id="estrelaTriste" src="#triste" position="0 2 -2" visible="false" width="1" height="1"></a-image>
+    <!-- Campo de texto -->
+    <a-entity id="campoTexto" text="value: ; width: 3; color: black" position="0 1.3 -4" visible="false"></a-entity>
 
-      <!-- Assets -->
-      <a-assets>
-        <img id="feliz" src="estrela-feliz.png" />
-        <img id="triste" src="estrela-triste.png" />
-      </a-assets>
-    </a-scene>
-  </body>
+    <!-- Estrela contente -->
+    <a-image id="estrelaContente" src="#estrelaFeliz" position="0 2 -4" visible="false" width="1" height="1"></a-image>
+
+    <!-- Estrela triste -->
+    <a-image id="estrelaTriste" src="#estrelaTriste" position="0 2 -4" visible="false" width="1" height="1"></a-image>
+
+    <!-- Assets -->
+    <a-assets>
+      <img id="estrelaFeliz" src="estrela_feliz.png">
+      <img id="estrelaTriste" src="estrela_triste.png">
+    </a-assets>
+
+    <!-- Luz e ambiente -->
+    <a-light type="ambient" color="#888"></a-light>
+    <a-plane rotation="-90 0 0" width="20" height="20" color="#CCC"></a-plane>
+  </a-scene>
+
+  <script>
+    AFRAME.registerComponent('interacao-lousa', {
+      init: function () {
+        const lousa = document.querySelector('#lousa');
+        const rig = document.querySelector('#cameraRig');
+        const palavra = document.querySelector('#palavra');
+        const teclado = document.querySelector('#teclado');
+        const campoTexto = document.querySelector('#campoTexto');
+        const cursor = document.querySelector('#cursor');
+
+        let interagiu = false;
+
+        lousa.addEventListener('click', () => {
+          if (interagiu) return;
+
+          const rigPosition = rig.object3D.position;
+          const lousaPosition = lousa.object3D.position;
+          const distancia = rigPosition.distanceTo(lousaPosition);
+
+          if (distancia > 1.5) {
+            const direction = new THREE.Vector3();
+            direction.subVectors(lousaPosition, rigPosition).normalize();
+            const novoDestino = lousaPosition.clone().addScaledVector(direction, -1.5);
+            rig.setAttribute('position', `${novoDestino.x} ${rigPosition.y} ${novoDestino.z}`);
+          }
+
+          palavra.setAttribute('visible', 'true');
+          teclado.setAttribute('visible', 'true');
+          campoTexto.setAttribute('visible', 'true');
+          cursor.setAttribute('visible', 'true');
+
+          interagiu = true;
+        });
+      }
+    });
+
+    AFRAME.registerComponent('letra', {
+      schema: { default: '' },
+      init: function () {
+        this.el.addEventListener('click', () => {
+          const campo = document.querySelector('#campoTexto');
+          campo.setAttribute('text', 'value', campo.getAttribute('text').value + this.data);
+        });
+      }
+    });
+
+    // Comportamento do botão Entrar
+    document.addEventListener('DOMContentLoaded', () => {
+      const entrar = document.querySelector('#entrar');
+      const campo = document.querySelector('#campoTexto');
+      const estrelaFeliz = document.querySelector('#estrelaContente');
+      const estrelaTriste = document.querySelector('#estrelaTriste');
+
+      entrar.addEventListener('click', () => {
+        const texto = campo.getAttribute('text').value.trim().toUpperCase();
+        if (texto === 'NINHO') {
+          estrelaFeliz.setAttribute('visible', 'true');
+          setTimeout(() => estrelaFeliz.setAttribute('visible', 'false'), 5000);
+        } else {
+          estrelaTriste.setAttribute('visible', 'true');
+          setTimeout(() => estrelaTriste.setAttribute('visible', 'false'), 5000);
+        }
+      });
+    });
+
+    // Ativa o componente de interação na lousa
+    document.querySelector('#lousa').setAttribute('interacao-lousa', '');
+  </script>
+</body>
 </html>
