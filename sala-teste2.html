@@ -10,21 +10,22 @@
   </style>
 
   <script>
-    // Componente que mantém a câmera fixa a 4.5m da lousa, sem mover
+    // Componente para manter distância fixa de 4.5m da lousa no eixo Z
     AFRAME.registerComponent('gaze-move-controller', {
-      init: function () {},
       tick: function () {
         const rig = this.el;
         const lousa = document.querySelector('#lousa');
         if (!lousa) return;
 
         const lousaPos = lousa.object3D.position;
-        // Mantém a posição fixa: x = lousa.x, y = rig.y, z = lousa.z + 4.5
-        rig.object3D.position.set(lousaPos.x, rig.object3D.position.y, lousaPos.z + 4.5);
+        const rigPos = rig.object3D.position;
+
+        // Mantém Z fixo a 4.5m atrás da lousa (lousa.z + 4.5)
+        rig.object3D.position.set(rigPos.x, rigPos.y, lousaPos.z + 4.5);
       }
     });
 
-    // Componente que ativa o teclado, palavra e texto após 2s de gaze na lousa
+    // Componente para ativar a exibição do teclado e palavra ao fixar o olhar por 2s na lousa
     AFRAME.registerComponent('gaze-activate-move', {
       init: function () {
         const rig = document.querySelector('#cameraRig');
@@ -32,29 +33,37 @@
 
         this.el.addEventListener('mouseenter', () => {
           this.timeout = setTimeout(() => {
+            if (rig.components['gaze-move-controller']) {
+              rig.components['gaze-move-controller'].moving = true;
+            }
+
+            // Mostrar palavra, texto digitado e teclado
             const imagem = document.querySelector('#imagem-ninho');
             const textoDigitado = document.querySelector('#texto-digitado');
             const teclado = document.querySelector('#teclado');
+            const tamanhoOriginal = { width: 1, height: 0.5 };
 
             imagem.setAttribute('visible', true);
             textoDigitado.setAttribute('visible', true);
             textoDigitado.setAttribute('value', '');
             imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', '1');
-            imagem.setAttribute('height', '0.5');
+            imagem.setAttribute('width', tamanhoOriginal.width.toString());
+            imagem.setAttribute('height', tamanhoOriginal.height.toString());
             imagem.setAttribute('position', '0 3 -4.9');
             teclado.setAttribute('visible', true);
-          }, 2000);
+          }, 2000); // 2 segundos fixando olhar ativa movimento
         });
 
         this.el.addEventListener('mouseleave', () => {
           clearTimeout(this.timeout);
-          // Não desativa nada para manter fixo
+          if (rig.components['gaze-move-controller']) {
+            rig.components['gaze-move-controller'].moving = false;
+          }
         });
       }
     });
 
-    // Aplica gaze-activate-move na lousa após carregar o DOM
+    // Aplica o componente à lousa após DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       const lousa = document.querySelector('#lousa');
       if (lousa) {
@@ -228,8 +237,8 @@
       static-body
     ></a-entity>
 
-    <!-- Câmera com movimento livre e gaze vermelho -->
-    <a-entity id="cameraRig" position="0 1.6 -4.5" gaze-move-controller>
+    <!-- Câmera com posição fixa Z e gaze -->
+    <a-entity id="cameraRig" position="0 1.6 -0.45" gaze-move-controller>
       <a-camera look-controls wasd-controls-enabled="true">
         <a-cursor
           fuse="true"
