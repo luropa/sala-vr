@@ -11,7 +11,7 @@
 
   <script>
     AFRAME.registerComponent('gaze-move-controller', {
-      schema: { speed: { type: 'number', default: 4.5 } },
+      schema: { speed: { type: 'number', default: 1.5 } },
       init: function () {
         this.direction = new THREE.Vector3();
         this.moving = false;
@@ -35,7 +35,7 @@
         const dz = camPos.z - lousaPos.z;
         const distXZ = Math.sqrt(dx * dx + dz * dz);
 
-        const limiteDistancia = 0.5; // 50 cm limite
+        const limiteDistancia = 4.5; // alterado para 4,5m
 
         if (distXZ > limiteDistancia) {
           const delta = this.data.speed * (deltaTime / 1000);
@@ -52,7 +52,7 @@
           );
 
           if (novaDistXZ <= limiteDistancia) {
-            // Posiciona exatamente a 50 cm da lousa
+            // Posiciona exatamente a 4,5m da lousa
             const dirParaLousa = new THREE.Vector3(
               lousaPos.x - camPos.x,
               0,
@@ -106,6 +106,7 @@
       }
     });
 
+    // Aplica o componente à lousa após DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       const lousa = document.querySelector('#lousa');
       if (lousa) {
@@ -129,52 +130,167 @@
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
 
     <!-- Piso e teto -->
-    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
+    <a-plane
+      src="piso1.png"
+      width="10"
+      height="10"
+      rotation="-90 0 0"
+      class="piso"
+      material="shader: flat;"
+    ></a-plane>
     <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
 
     <!-- Lustre -->
-    <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
+    <a-image
+      src="sol.png"
+      width="2"
+      height="2"
+      position="0 4.95 0"
+      rotation="-90 0 180"
+    ></a-image>
 
     <!-- Paredes -->
-    <a-plane width="10" height="5" position="0 2.5 -5" rotation="0 0 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane
+      width="10"
+      height="5"
+      position="0 2.5 -5"
+      rotation="0 0 0"
+      material="src: paredeerodape2.png; side: front;"
+    ></a-plane>
+    <a-plane
+      width="10"
+      height="5"
+      position="0 2.5 5"
+      rotation="0 180 0"
+      material="src: paredeerodape2.png; side: front;"
+    ></a-plane>
+    <a-plane
+      width="10"
+      height="5"
+      position="-5 2.5 0"
+      rotation="0 90 0"
+      material="src: paredeerodape2.png; side: front;"
+    ></a-plane>
+    <a-plane
+      width="10"
+      height="5"
+      position="5 2.5 0"
+      rotation="0 -90 0"
+      material="src: paredeerodape2.png; side: front;"
+    ></a-plane>
 
     <!-- Porta -->
-    <a-image src="porta.png" width="2" height="4" position="0 1.9 4.95" rotation="0 180 0"></a-image>
+    <a-image
+      src="porta.png"
+      width="2"
+      height="4"
+      position="0 1.9 4.95"
+      rotation="0 180 0"
+    ></a-image>
 
     <!-- Lousa -->
-    <a-image id="lousa" interacao-lousa src="lousaembranco2.png" width="5.6" height="3.1" position="0 2.5 -4.95" gaze-activate-move></a-image>
+    <a-image
+      id="lousa"
+      interacao-lousa
+      src="lousaembranco2.png"
+      width="5.6"
+      height="3.1"
+      position="0 2.5 -4.95"
+      gaze-activate-move
+    ></a-image>
 
     <!-- Palavra ou estrela -->
-    <a-image id="imagem-ninho" src="#img-ninho" width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
+    <a-image
+      id="imagem-ninho"
+      src="#img-ninho"
+      width="1"
+      height="0.5"
+      position="0 3 -4.9"
+      visible="false"
+    ></a-image>
 
     <!-- Texto digitado -->
-    <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" visible="false"></a-text>
+    <a-text
+      id="texto-digitado"
+      value=""
+      position="0 2.5 -4.9"
+      color="#000"
+      align="center"
+      width="3"
+      visible="false"
+    ></a-text>
 
     <!-- Teclado -->
     <a-entity id="teclado" visible="false"></a-entity>
 
     <!-- Objetos da sala -->
-    <a-image src="tapete.png" width="5" height="7" rotation="-90 0 0" position="-3 0.01 1"></a-image>
-    <a-image src="ponteirotwister.png" width="0.9" height="0.9" rotation="-90 0 0" position="-1.2 0.02 2"></a-image>
-    <a-image src="tatame.png" width="4" height="4" rotation="-90 0 0" position="2.7 0.01 1"></a-image>
-    <a-image src="quebra-cabeca.png" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
+    <a-image
+      src="tapete.png"
+      width="5"
+      height="7"
+      rotation="-90 0 0"
+      position="-3 0.01 1"
+    ></a-image>
+    <a-image
+      src="ponteirotwister.png"
+      width="0.9"
+      height="0.9"
+      rotation="-90 0 0"
+      position="-1.2 0.02 2"
+    ></a-image>
+    <a-image
+      src="tatame.png"
+      width="4"
+      height="4"
+      rotation="-90 0 0"
+      position="2.7 0.01 1"
+    ></a-image>
+    <a-image
+      src="quebra-cabeca.png"
+      width="1.4"
+      height="1.8"
+      rotation="-90 10 0"
+      position="1.55 0.02 2"
+    ></a-image>
     <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
-    <a-image src="jogo-da-velha-feltro2.png" width="1.5" height="1.5" position="3 1.5 4.94" rotation="0 180 0"></a-image>
-    <a-image src="interruptor-branco.png" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
+    <a-image
+      src="jogo-da-velha-feltro2.png"
+      width="1.5"
+      height="1.5"
+      position="3 1.5 4.94"
+      rotation="0 180 0"
+    ></a-image>
+    <a-image
+      src="interruptor-branco.png"
+      width="0.3"
+      height="0.3"
+      position="-1.5 2 4.94"
+      rotation="0 180 0"
+    ></a-image>
     <a-image src="relogio2.png" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
     <a-image src="nuvem2.png" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
     <a-image src="nuvem2.png" width="2" height="1.7" position="-3.5 3.5 -4.95"></a-image>
 
     <!-- Cadeira -->
-    <a-entity id="cadeira" gltf-model="#modeloCadeira" position="3 0 -3" scale="0.8 0.8 0.8" static-body></a-entity>
+    <a-entity
+      id="cadeira"
+      gltf-model="#modeloCadeira"
+      position="3 0 -3"
+      scale="0.8 0.8 0.8"
+      static-body
+    ></a-entity>
 
     <!-- Câmera com movimento livre e gaze vermelho -->
     <a-entity id="cameraRig" position="0 1.6 0" gaze-move-controller>
       <a-camera look-controls wasd-controls-enabled="true">
-        <a-cursor fuse="true" fuse-timeout="2000" color="red" geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02" material="color: red; shader: flat" position="0 0 -1"></a-cursor>
+        <a-cursor
+          fuse="true"
+          fuse-timeout="2000"
+          color="red"
+          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+          material="color: red; shader: flat"
+          position="0 0 -1"
+        ></a-cursor>
       </a-camera>
     </a-entity>
 
@@ -186,6 +302,8 @@
   </a-scene>
 
   <script>
+    // Código do teclado e interação com a lousa abaixo
+    const lousa = document.querySelector('#lousa');
     const imagem = document.querySelector('#imagem-ninho');
     const teclado = document.querySelector('#teclado');
     const textoDigitado = document.querySelector('#texto-digitado');
@@ -286,16 +404,20 @@
             imagem.setAttribute('height', '1.2');
             imagem.setAttribute('position', '0 3 -4.8');
             textoDigitado.setAttribute('visible', false);
+
+            // Desliga movimento para não aproximar a câmera
+            const rig = document.querySelector('#cameraRig');
+            if (rig && rig.components['gaze-move-controller']) {
+              rig.components['gaze-move-controller'].moving = false;
+            }
           } else {
             imagem.setAttribute('src', '#img-estrela-triste');
             imagem.setAttribute('material', 'transparent: true');
             imagem.setAttribute('width', '1.7');
             imagem.setAttribute('height', '1.5');
             imagem.setAttribute('position', '0 3 -4.8');
-            // Mantém o texto visível para o usuário continuar digitando
-            // textoDigitado.setAttribute('visible', true);
+            textoDigitado.setAttribute('visible', false);
 
-            // Opcional: pode limpar texto após 3s para nova tentativa
             setTimeout(() => {
               imagem.setAttribute('src', '#img-ninho');
               imagem.setAttribute('width', tamanhoOriginal.width.toString());
