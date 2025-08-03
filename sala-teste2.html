@@ -16,6 +16,7 @@
         this.direction = new THREE.Vector3();
         this.moving = false;
         this.cameraEl = this.el.querySelector('a-camera');
+        console.log('gaze-move-controller iniciado');
       },
       tick: function (time, deltaTime) {
         if (!this.moving) return;
@@ -25,17 +26,17 @@
         this.direction.y = 0; // impede movimento para cima/baixo
         this.direction.normalize();
 
-        // Novo cálculo de posição com limite de 50cm da lousa
         const proposedPosition = this.el.object3D.position.clone()
           .add(this.direction.clone().multiplyScalar(-d));
 
-        // A lousa está em z = -4.95, limite da câmera é z = -4.45 (50 cm na frente)
+        // Limite: lousa está em z = -4.95, limite é 0.5m na frente => z > -4.45 não deixa passar
         if (proposedPosition.z > -4.45) {
-          // Não permite passar do limite
+          // console.log('Limite de distância atingido');
           return;
         }
 
         this.el.object3D.position.copy(proposedPosition);
+        // console.log('Movimentando para frente:', proposedPosition);
       }
     });
 
@@ -45,9 +46,11 @@
         this.timeout = null;
 
         this.el.addEventListener('mouseenter', () => {
+          // console.log('Olhar entrou na lousa');
           this.timeout = setTimeout(() => {
             if (rig.components['gaze-move-controller']) {
               rig.components['gaze-move-controller'].moving = true;
+              console.log('Movimento ativado');
             }
           }, 2000); // 2 segundos fixando olhar ativa movimento
         });
@@ -56,12 +59,12 @@
           clearTimeout(this.timeout);
           if (rig.components['gaze-move-controller']) {
             rig.components['gaze-move-controller'].moving = false;
+            console.log('Movimento desativado');
           }
         });
       }
     });
 
-    // Aplica o componente à lousa após DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       const lousa = document.querySelector('#lousa');
       if (lousa) {
@@ -395,4 +398,13 @@
       textoEntity.setAttribute('align', 'center');
       textoEntity.setAttribute('color', '#000');
       textoEntity.setAttribute('width', '2');
-      textoEntity.setAttribute('position', '0 0 
+      textoEntity.setAttribute('position', '0 0 0.02');
+
+      plano.appendChild(textoEntity);
+      plano.addEventListener('click', callback);
+      teclado.appendChild(plano);
+    }
+  </script>
+</body>
+</html>
+
