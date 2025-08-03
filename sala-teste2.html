@@ -25,8 +25,8 @@
         this.direction.y = 0; // impede movimento para cima/baixo
         this.direction.normalize();
 
-        // Move para frente da câmera
-        this.el.object3D.position.add(this.direction.multiplyScalar(d));
+        // Invertendo o vetor para andar para frente corretamente
+        this.el.object3D.position.add(this.direction.multiplyScalar(-d));
       }
     });
 
@@ -52,7 +52,7 @@
       }
     });
 
-    // Apenas para garantir que o componente gaze-activate-move está aplicado após DOM pronto
+    // Aplica o componente à lousa após DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       const lousa = document.querySelector('#lousa');
       if (lousa) {
@@ -248,6 +248,7 @@
   </a-scene>
 
   <script>
+    // Código do teclado e interação com a lousa abaixo
     const lousa = document.querySelector('#lousa');
     const imagem = document.querySelector('#imagem-ninho');
     const teclado = document.querySelector('#teclado');
