@@ -35,7 +35,7 @@
         const dz = camPos.z - lousaPos.z;
         const distXZ = Math.sqrt(dx * dx + dz * dz);
 
-        const limiteDistancia = 3.5; // alterado para 1,5 metros
+        const limiteDistancia = 4.5; // alterado para 1,5 metros
 
         if (distXZ > limiteDistancia) {
           const delta = this.data.speed * (deltaTime / 1000);
