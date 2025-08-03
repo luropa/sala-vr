@@ -1,128 +1,59 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <title>Sala de Estudo VR</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-</head>
-<body>
-  <a-scene>
-    <!-- Câmera com cursor de gaze -->
-    <a-entity id="cameraRig" position="0 1.6 4">
-      <a-camera id="camera">
-        <a-cursor
-          id="cursor"
-          color="red"
-          fuse="true"
-          fuse-timeout="2000">
-        </a-cursor>
-      </a-camera>
-    </a-entity>
+<script>
+  AFRAME.registerComponent('gaze-move-controller', {
+    schema: { speed: { type: 'number', default: 1.5 } },
+    init: function () {
+      this.direction = new THREE.Vector3();
+      this.moving = false;
+      this.cameraEl = this.el.querySelector('a-camera');
+      this.aproximado = false; // trava a aproximação após chegar a 1.5m
+    },
+    tick: function (time, deltaTime) {
+      if (!this.moving || this.aproximado) return;
 
-    <!-- Lousa -->
-    <a-box id="lousa" position="0 1.6 -4" width="3" height="2" depth="0.1" color="#333"></a-box>
+      const rig = this.el;
+      const lousa = document.querySelector('#lousa');
 
-    <!-- Palavra "ninho" (inicialmente oculta) -->
-    <a-entity id="palavra" text="value: NINHO; align: center; color: white; width: 4" position="0 2.6 -4" visible="false"></a-entity>
+      const camPos = rig.object3D.position;
+      const lousaPos = lousa.object3D.position;
 
-    <!-- Teclado virtual -->
-    <a-entity id="teclado" position="0 1 -3.5" visible="false">
-      <!-- Letras do teclado -->
-      <a-box letra="N" position="-1 0 0" color="#AAF"></a-box>
-      <a-box letra="I" position="-0.5 0 0" color="#AFA"></a-box>
-      <a-box letra="H" position="0 0 0" color="#FAA"></a-box>
-      <a-box letra="O" position="0.5 0 0" color="#FFA"></a-box>
-      <!-- Botão "Entrar" -->
-      <a-box id="entrar" position="1.5 0 0" color="green"></a-box>
-    </a-entity>
+      this.cameraEl.object3D.getWorldDirection(this.direction);
+      this.direction.y = 0;
+      this.direction.normalize();
 
-    <!-- Campo de texto -->
-    <a-entity id="campoTexto" text="value: ; width: 3; color: black" position="0 1.3 -4" visible="false"></a-entity>
+      const dx = camPos.x - lousaPos.x;
+      const dz = camPos.z - lousaPos.z;
+      const distXZ = Math.sqrt(dx * dx + dz * dz);
 
-    <!-- Estrela contente -->
-    <a-image id="estrelaContente" src="#estrelaFeliz" position="0 2 -4" visible="false" width="1" height="1"></a-image>
+      const limiteDistancia = 1.5; // 1,5 metros
 
-    <!-- Estrela triste -->
-    <a-image id="estrelaTriste" src="#estrelaTriste" position="0 2 -4" visible="false" width="1" height="1"></a-image>
+      if (distXZ > limiteDistancia) {
+        const delta = this.data.speed * (deltaTime / 1000);
+        const moveVector = this.direction.clone().multiplyScalar(-delta);
 
-    <!-- Assets -->
-    <a-assets>
-      <img id="estrelaFeliz" src="estrela_feliz.png">
-      <img id="estrelaTriste" src="estrela_triste.png">
-    </a-assets>
+        const novaX = camPos.x + moveVector.x;
+        const novaZ = camPos.z + moveVector.z;
 
-    <!-- Luz e ambiente -->
-    <a-light type="ambient" color="#888"></a-light>
-    <a-plane rotation="-90 0 0" width="20" height="20" color="#CCC"></a-plane>
-  </a-scene>
+        const novaDistXZ = Math.sqrt(
+          (novaX - lousaPos.x) * (novaX - lousaPos.x) +
+          (novaZ - lousaPos.z) * (novaZ - lousaPos.z)
+        );
 
-  <script>
-    AFRAME.registerComponent('interacao-lousa', {
-      init: function () {
-        const lousa = document.querySelector('#lousa');
-        const rig = document.querySelector('#cameraRig');
-        const palavra = document.querySelector('#palavra');
-        const teclado = document.querySelector('#teclado');
-        const campoTexto = document.querySelector('#campoTexto');
-        const cursor = document.querySelector('#cursor');
+        if (novaDistXZ <= limiteDistancia) {
+          const dirParaLousa = new THREE.Vector3(
+            lousaPos.x - camPos.x,
+            0,
+            lousaPos.z - camPos.z
+          ).normalize();
 
-        let interagiu = false;
+          rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
+          rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
 
-        lousa.addEventListener('click', () => {
-          if (interagiu) return;
-
-          const rigPosition = rig.object3D.position;
-          const lousaPosition = lousa.object3D.position;
-          const distancia = rigPosition.distanceTo(lousaPosition);
-
-          if (distancia > 1.5) {
-            const direction = new THREE.Vector3();
-            direction.subVectors(lousaPosition, rigPosition).normalize();
-            const novoDestino = lousaPosition.clone().addScaledVector(direction, -1.5);
-            rig.setAttribute('position', `${novoDestino.x} ${rigPosition.y} ${novoDestino.z}`);
-          }
-
-          palavra.setAttribute('visible', 'true');
-          teclado.setAttribute('visible', 'true');
-          campoTexto.setAttribute('visible', 'true');
-          cursor.setAttribute('visible', 'true');
-
-          interagiu = true;
-        });
-      }
-    });
-
-    AFRAME.registerComponent('letra', {
-      schema: { default: '' },
-      init: function () {
-        this.el.addEventListener('click', () => {
-          const campo = document.querySelector('#campoTexto');
-          campo.setAttribute('text', 'value', campo.getAttribute('text').value + this.data);
-        });
-      }
-    });
-
-    // Comportamento do botão Entrar
-    document.addEventListener('DOMContentLoaded', () => {
-      const entrar = document.querySelector('#entrar');
-      const campo = document.querySelector('#campoTexto');
-      const estrelaFeliz = document.querySelector('#estrelaContente');
-      const estrelaTriste = document.querySelector('#estrelaTriste');
-
-      entrar.addEventListener('click', () => {
-        const texto = campo.getAttribute('text').value.trim().toUpperCase();
-        if (texto === 'NINHO') {
-          estrelaFeliz.setAttribute('visible', 'true');
-          setTimeout(() => estrelaFeliz.setAttribute('visible', 'false'), 5000);
+          this.aproximado = true;
         } else {
-          estrelaTriste.setAttribute('visible', 'true');
-          setTimeout(() => estrelaTriste.setAttribute('visible', 'false'), 5000);
+          rig.object3D.position.x = novaX;
+          rig.object3D.position.z = novaZ;
         }
-      });
-    });
-
-    // Ativa o componente de interação na lousa
-    document.querySelector('#lousa').setAttribute('interacao-lousa', '');
-  </script>
-</body>
-</html>
+      }
+    }
+  });
+</script>
