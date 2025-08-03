@@ -10,22 +10,45 @@
   </style>
 
   <script>
-    // Componente para manter distância fixa de 4.5m da lousa no eixo Z
     AFRAME.registerComponent('gaze-move-controller', {
-      tick: function () {
+      schema: { speed: { type: 'number', default: 1.5 } },
+      init: function () {
+        this.direction = new THREE.Vector3();
+        this.moving = false;
+        this.cameraEl = this.el.querySelector('a-camera');
+      },
+      tick: function (time, deltaTime) {
+        if (!this.moving) return;
+
         const rig = this.el;
         const lousa = document.querySelector('#lousa');
-        if (!lousa) return;
 
+        const camPos = rig.object3D.position;
         const lousaPos = lousa.object3D.position;
-        const rigPos = rig.object3D.position;
 
-        // Mantém Z fixo a 4.5m atrás da lousa (lousa.z + 4.5)
-        rig.object3D.position.set(rigPos.x, rigPos.y, lousaPos.z + 4.5);
+        this.cameraEl.object3D.getWorldDirection(this.direction);
+        this.direction.y = 0;
+        this.direction.normalize();
+
+        // Calcula distância atual no plano XZ
+        const dx = camPos.x - lousaPos.x;
+        const dz = camPos.z - lousaPos.z;
+        const distXZ = Math.sqrt(dx * dx + dz * dz);
+
+        const limiteDistancia = 4.5; // distância fixa 4,5m da lousa
+
+        // Ajusta posição para sempre manter 4,5m da lousa
+        const dirParaLousa = new THREE.Vector3(
+          camPos.x - lousaPos.x,
+          0,
+          camPos.z - lousaPos.z
+        ).normalize();
+
+        rig.object3D.position.x = lousaPos.x + dirParaLousa.x * limiteDistancia;
+        rig.object3D.position.z = lousaPos.z + dirParaLousa.z * limiteDistancia;
       }
     });
 
-    // Componente para ativar a exibição do teclado e palavra ao fixar o olhar por 2s na lousa
     AFRAME.registerComponent('gaze-activate-move', {
       init: function () {
         const rig = document.querySelector('#cameraRig');
@@ -37,7 +60,7 @@
               rig.components['gaze-move-controller'].moving = true;
             }
 
-            // Mostrar palavra, texto digitado e teclado
+            // Mostrar palavra e teclado ao iniciar movimento
             const imagem = document.querySelector('#imagem-ninho');
             const textoDigitado = document.querySelector('#texto-digitado');
             const teclado = document.querySelector('#teclado');
@@ -237,8 +260,8 @@
       static-body
     ></a-entity>
 
-    <!-- Câmera com posição fixa Z e gaze -->
-    <a-entity id="cameraRig" position="0 1.6 -0.45" gaze-move-controller>
+    <!-- Câmera com movimento livre e gaze vermelho -->
+    <a-entity id="cameraRig" position="0 1.6 0" gaze-move-controller>
       <a-camera look-controls wasd-controls-enabled="true">
         <a-cursor
           fuse="true"
@@ -361,6 +384,8 @@
             imagem.setAttribute('height', '1.2');
             imagem.setAttribute('position', '0 3 -4.8');
             textoDigitado.setAttribute('visible', false);
+            teclado.setAttribute('visible', false);
+            // Não aparece mais nada depois
           } else {
             imagem.setAttribute('src', '#img-estrela-triste');
             imagem.setAttribute('material', 'transparent: true');
@@ -376,6 +401,7 @@
               imagem.setAttribute('position', '0 3 -4.9');
               textoDigitado.setAttribute('value', '');
               textoDigitado.setAttribute('visible', true);
+              teclado.setAttribute('visible', true);
             }, 3000);
           }
         },
