@@ -1,370 +1,178 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-teleport-controls/dist/aframe-teleport-controls.min.js"></script>
-  <style>
-    body { margin: 0; overflow: hidden; background: #fcefdc; }
-  </style>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sala de Estudo VR</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent("olhar-lousa", {
+        init: function () {
+          const el = this.el;
+          let olhando = false;
+          let tempoOlhar = 0;
+          let jaAproximou = false;
 
-  <script>
-    AFRAME.registerComponent('gaze-move-controller', {
-      schema: { speed: { type: 'number', default: 1.5 } },
-      init: function () {
-        this.direction = new THREE.Vector3();
-        this.moving = false;
-        this.cameraEl = this.el.querySelector('a-camera');
-        this.aproximado = false; // trava a aproximação após chegar a 50cm
-      },
-      tick: function (time, deltaTime) {
-        if (!this.moving) return;
-
-        if (this.aproximado) {
-          // Já está na posição limite, não permite mais movimento de aproximação
-          return;
-        }
-
-        const rig = this.el;
-        const lousa = document.querySelector('#lousa');
-
-        const camPos = rig.object3D.position;
-        const lousaPos = lousa.object3D.position;
-
-        this.cameraEl.object3D.getWorldDirection(this.direction);
-        this.direction.y = 0; // impede movimento vertical
-        this.direction.normalize();
-
-        // Distância horizontal (X,Z)
-        const dx = camPos.x - lousaPos.x;
-        const dz = camPos.z - lousaPos.z;
-        const distXZ = Math.sqrt(dx * dx + dz * dz);
-
-        const limiteDistancia = 0.5; // 50 cm
-
-        if (distXZ > limiteDistancia) {
-          const delta = this.data.speed * (deltaTime / 1000);
-          const moveVector = this.direction.clone().multiplyScalar(-delta);
-
-          const novaX = camPos.x + moveVector.x;
-          const novaZ = camPos.z + moveVector.z;
-
-          const novaDistXZ = Math.sqrt(
-            (novaX - lousaPos.x) * (novaX - lousaPos.x) +
-            (novaZ - lousaPos.z) * (novaZ - lousaPos.z)
-          );
-
-          if (novaDistXZ <= limiteDistancia) {
-            // Ajusta exatamente para 50 cm da lousa
-            const dirParaLousa = new THREE.Vector3(
-              lousaPos.x - camPos.x,
-              0,
-              lousaPos.z - camPos.z
-            ).normalize();
-
-            rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
-            rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
-
-            this.aproximado = true; // bloqueia movimentos futuros de aproximação
-          } else {
-            rig.object3D.position.x = novaX;
-            rig.object3D.position.z = novaZ;
-          }
-        }
-      }
-    });
-
-    AFRAME.registerComponent('gaze-activate-move', {
-      init: function () {
-        const rig = document.querySelector('#cameraRig');
-        this.timeout = null;
-
-        this.el.addEventListener('mouseenter', () => {
-          this.timeout = setTimeout(() => {
-            if (rig.components['gaze-move-controller']) {
-              rig.components['gaze-move-controller'].moving = true;
+          this.tick = function (time, deltaTime) {
+            if (el.is("olhando")) {
+              if (!olhando) {
+                olhando = true;
+                tempoOlhar = 0;
+              } else {
+                tempoOlhar += deltaTime;
+                if (tempoOlhar > 2000 && !jaAproximou) {
+                  jaAproximou = true;
+                  aproximarCamera();
+                  mostrarElementos();
+                }
+              }
+            } else {
+              olhando = false;
+              tempoOlhar = 0;
             }
+          };
 
-            // Mostrar palavra, cursor e teclado ao iniciar movimento
-            const imagem = document.querySelector('#imagem-ninho');
-            const textoDigitado = document.querySelector('#texto-digitado');
-            const teclado = document.querySelector('#teclado');
-            const tamanhoOriginal = { width: 1, height: 0.5 };
+          function aproximarCamera() {
+            const camera = document.querySelector("[camera]");
+            const lousa = document.querySelector("#lousa");
+            const posLousa = lousa.object3D.position;
+            const dir = new THREE.Vector3().subVectors(posLousa, camera.object3D.position).normalize();
+            const novaPosicao = new THREE.Vector3().copy(posLousa).addScaledVector(dir, -1.5);
+            camera.setAttribute("position", novaPosicao);
+          }
 
-            imagem.setAttribute('visible', true);
-            textoDigitado.setAttribute('visible', true);
-            textoDigitado.setAttribute('value', '');
-            imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', tamanhoOriginal.width.toString());
-            imagem.setAttribute('height', tamanhoOriginal.height.toString());
-            imagem.setAttribute('position', '0 3 -4.9');
-            teclado.setAttribute('visible', true);
-          }, 2000);
-        });
+          function mostrarElementos() {
+            document.querySelector("#teclado").setAttribute("visible", true);
+            document.querySelector("#campoTexto").setAttribute("visible", true);
+            document.querySelector("#palavraNinho").setAttribute("visible", true);
+            document.querySelector("#cursor").setAttribute("visible", true);
+          }
+        },
+      });
 
-        this.el.addEventListener('mouseleave', () => {
-          clearTimeout(this.timeout);
-          if (rig.components['gaze-move-controller']) {
-            rig.components['gaze-move-controller'].moving = false;
-            // NÃO resetamos rig.components['gaze-move-controller'].aproximado para manter travamento
+      AFRAME.registerComponent("interacao-lousa", {
+        init: function () {
+          const lousa = this.el;
+          lousa.addEventListener("mouseenter", () => lousa.addState("olhando"));
+          lousa.addEventListener("mouseleave", () => lousa.removeState("olhando"));
+        },
+      });
+
+      function verificarPalavra() {
+        const texto = document.querySelector("#campoTexto").getAttribute("value").toLowerCase();
+        const estrelaFeliz = document.querySelector("#estrelaFeliz");
+        const estrelaTriste = document.querySelector("#estrelaTriste");
+
+        if (texto === "ninho") {
+          estrelaFeliz.setAttribute("visible", true);
+          setTimeout(() => estrelaFeliz.setAttribute("visible", false), 5000);
+        } else {
+          estrelaTriste.setAttribute("visible", true);
+          setTimeout(() => estrelaTriste.setAttribute("visible", false), 5000);
+        }
+      }
+
+      function adicionarLetra(letra) {
+        const campo = document.querySelector("#campoTexto");
+        const textoAtual = campo.getAttribute("value");
+        if (textoAtual.length < 10) {
+          campo.setAttribute("value", textoAtual + letra);
+        }
+      }
+
+      function criarTecla(letra, x, y) {
+        const cena = document.querySelector("a-scene");
+        const tecla = document.createElement("a-plane");
+        tecla.setAttribute("color", "#CCC");
+        tecla.setAttribute("width", "0.3");
+        tecla.setAttribute("height", "0.3");
+        tecla.setAttribute("position", `${x} ${y} -2`);
+        tecla.setAttribute("text", `value: ${letra.toUpperCase()}; align: center; color: black`);
+        tecla.setAttribute("class", "interactable");
+        tecla.addEventListener("click", () => adicionarLetra(letra));
+        cena.appendChild(tecla);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const letras = "abcdefghijklmnopqrstuvwxyz";
+        let x = -2;
+        let y = 1.5;
+        letras.split("").forEach((letra, index) => {
+          criarTecla(letra, x, y);
+          x += 0.35;
+          if ((index + 1) % 10 === 0) {
+            x = -2;
+            y -= 0.4;
           }
         });
-      }
-    });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const lousa = document.querySelector('#lousa');
-      if (lousa) {
-        lousa.setAttribute('gaze-activate-move', '');
-      }
-    });
-  </script>
-</head>
-
-<body>
-  <a-scene>
-    <!-- Assets -->
-    <a-assets>
-      <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
-      <img id="img-ninho" src="palavraninho.png" />
-      <img id="img-estrela" src="estrelacontente.png" />
-      <img id="img-estrela-triste" src="estrelatriste.png" />
-    </a-assets>
-
-    <!-- Luz ambiente -->
-    <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
-
-    <!-- Piso e teto -->
-    <a-plane
-      src="piso1.png"
-      width="10"
-      height="10"
-      rotation="-90 0 0"
-      class="piso"
-      material="shader: flat;"
-    ></a-plane>
-    <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
-
-    <!-- Lustre -->
-    <a-image
-      src="sol.png"
-      width="2"
-      height="2"
-      position="0 4.95 0"
-      rotation="-90 0 180"
-    ></a-image>
-
-    <!-- Paredes -->
-    <a-plane
-      width="10"
-      height="5"
-      position="0 2.5 -5"
-      rotation="0 0 0"
-      material="src: paredeerodape2.png; side: front;"
-    ></a-plane>
-    <a-plane
-      width="10"
-      height="5"
-      position="0 2.5 5"
-      rotation="0 180 0"
-      material="src: paredeerodape2.png; side: front;"
-    ></a-plane>
-    <a-plane
-      width="10"
-      height="5"
-      position="-5 2.5 0"
-      rotation="0 90 0"
-      material="src: paredeerodape2.png; side: front;"
-    ></a-plane>
-    <a-plane
-      width="10"
-      height="5"
-      position="5 2.5 0"
-      rotation="0 -90 0"
-      material="src: paredeerodape2.png; side: front;"
-    ></a-plane>
-
-    <!-- Porta -->
-    <a-image
-      src="porta.png"
-      width="2"
-      height="4"
-      position="0 1.9 4.95"
-      rotation="0 180 0"
-    ></a-image>
-
-    <!-- Lousa -->
-    <a-image
-      id="lousa"
-      interacao-lousa
-      src="lousaembranco2.png"
-      width="5.6"
-      height="3.1"
-      position="0 2.5 -4.95"
-      gaze-activate-move
-    ></a-image>
-
-    <!-- Palavra ou estrela -->
-    <a-image
-      id="imagem-ninho"
-      src="#img-ninho"
-      width="1"
-      height="0.5"
-      position="0 3 -4.9"
-      visible="false"
-    ></a-image>
-
-    <!-- Texto digitado -->
-    <a-text
-      id="texto-digitado"
-      value=""
-      position="0 2.5 -4.9"
-      color="#000"
-      align="center"
-      width="3"
-      visible="false"
-    ></a-text>
-
-    <!-- Teclado -->
-    <a-entity id="teclado" visible="false"></a-entity>
-
-    <!-- Objetos da sala -->
-    <a-image
-      src="tapete.png"
-      width="5"
-      height="7"
-      rotation="-90 0 0"
-      position="-3 0.01 1"
-    ></a-image>
-    <a-image
-      src="ponteirotwister.png"
-      width="0.9"
-      height="0.9"
-      rotation="-90 0 0"
-      position="-1.2 0.02 2"
-    ></a-image>
-    <a-image
-      src="tatame.png"
-      width="4"
-      height="4"
-      rotation="-90 0 0"
-      position="2.7 0.01 1"
-    ></a-image>
-    <a-image
-      src="quebra-cabeca.png"
-      width="1.4"
-      height="1.8"
-      rotation="-90 10 0"
-      position="1.55 0.02 2"
-    ></a-image>
-    <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
-    <a-image
-      src="jogo-da-velha-feltro2.png"
-      width="1.5"
-      height="1.5"
-      position="3 1.5 4.94"
-      rotation="0 180 0"
-    ></a-image>
-    <a-image
-      src="interruptor-branco.png"
-      width="0.3"
-      height="0.3"
-      position="-1.5 2 4.94"
-      rotation="0 180 0"
-    ></a-image>
-    <a-image src="relogio2.png" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
-    <a-image src="nuvem2.png" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
-    <a-image src="nuvem2.png" width="2" height="1.7" position="-3.5 3.5 -4.95"></a-image>
-
-    <!-- Cadeira -->
-    <a-entity
-      id="cadeira"
-      gltf-model="#modeloCadeira"
-      position="3 0 -3"
-      scale="0.8 0.8 0.8"
-      static-body
-    ></a-entity>
-
-    <!-- Câmera com movimento livre e gaze vermelho -->
-    <a-entity id="cameraRig" position="0 1.6 0" gaze-move-controller>
-      <a-camera look-controls wasd-controls-enabled="true">
-        <a-cursor
-          fuse="true"
-          fuse-timeout="2000"
-          color="red"
-          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-          material="color: red; shader: flat"
+        const enter = document.createElement("a-plane");
+        enter.setAttribute("color", "#6C6");
+        enter.setAttribute("width", "1");
+        enter.setAttribute("height", "0.3");
+        enter.setAttribute("position", `0 -0.2 -2`);
+        enter.setAttribute("text", "value: ENTRAR; align: center; color: white");
+        enter.addEventListener("click", verificarPalavra);
+        document.querySelector("a-scene").appendChild(enter);
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Câmera com cursor -->
+      <a-entity camera position="0 1.6 4">
+        <a-entity
+          id="cursor"
+          cursor="fuse: true; fuseTimeout: 2000"
           position="0 0 -1"
-        ></a-cursor>
-      </a-camera>
-    </a-entity>
+          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+          material="color: red; shader: flat"
+          visible="false"
+        ></a-entity>
+      </a-entity>
 
-    <!-- Teleporte para VR -->
-    <a-entity id="teleportRig" position="0 0 0">
-      <a-entity laser-controls="hand: right"></a-entity>
-      <a-entity teleport-controls="cameraRig: #cameraRig; button: trigger; collisionEntities: .piso;"></a-entity>
-    </a-entity>
-  </a-scene>
+      <!-- Lousa -->
+      <a-plane
+        id="lousa"
+        interacao-lousa
+        olhar-lousa
+        position="0 1.6 -2"
+        rotation="0 0 0"
+        width="3"
+        height="2"
+        color="#222"
+      ></a-plane>
 
-  <script>
-    // Código do teclado e interação com a lousa abaixo
-    const lousa = document.querySelector('#lousa');
-    const imagem = document.querySelector('#imagem-ninho');
-    const teclado = document.querySelector('#teclado');
-    const textoDigitado = document.querySelector('#texto-digitado');
+      <!-- Palavra "ninho" -->
+      <a-text
+        id="palavraNinho"
+        value="ninho"
+        align="center"
+        position="0 2.4 -2"
+        color="white"
+        width="4"
+        visible="false"
+      ></a-text>
 
-    const tamanhoOriginal = { width: 1, height: 0.5 };
-    let tecladoCriado = false;
+      <!-- Campo de texto -->
+      <a-text
+        id="campoTexto"
+        value=""
+        align="center"
+        position="0 1 -2"
+        color="white"
+        width="4"
+        visible="false"
+      ></a-text>
 
-    AFRAME.registerComponent('interacao-lousa', {
-      init: function () {
-        this.el.addEventListener('mouseenter', () => {
-          this.timeout = setTimeout(() => {
-            imagem.setAttribute('visible', true);
-            textoDigitado.setAttribute('visible', true);
-            textoDigitado.setAttribute('value', '');
-            imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', tamanhoOriginal.width.toString());
-            imagem.setAttribute('height', tamanhoOriginal.height.toString());
-            imagem.setAttribute('position', '0 3 -4.9');
+      <!-- Estrelas -->
+      <a-image id="estrelaFeliz" src="#feliz" position="0 2 -2" visible="false" width="1" height="1"></a-image>
+      <a-image id="estrelaTriste" src="#triste" position="0 2 -2" visible="false" width="1" height="1"></a-image>
 
-            if (!tecladoCriado) {
-              criarTeclado();
-              tecladoCriado = true;
-            }
-
-            teclado.setAttribute('visible', true);
-          }, 2000);
-        });
-
-        this.el.addEventListener('mouseleave', () => {
-          clearTimeout(this.timeout);
-        });
-      }
-    });
-
-    function criarTeclado() {
-      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-      const espacamentoX = 0.3;
-      const espacamentoY = 0.3;
-      const startX = -6 * espacamentoX;
-      const startY = 1.9;
-      const corTecla = '#ffffff';
-      const opacidadeTecla = 0.2;
-
-      letras.forEach((letra, index) => {
-        const linha = index < 13 ? 0 : 1;
-        const col = index % 13;
-        const x = startX + col * espacamentoX;
-        const y = startY - linha * espacamentoY;
-
-        const plano = document.createElement('a-plane');
-        plano.setAttribute('width', 0.35);
-        plano.setAttribute('height', 0.35);
-        plano.setAttribute('color', corTecla);
-        plano.setAttribute('opacity', opacidadeTecla);
-        plano.setAttribute('position', `${x} ${y} -4.9`);
-
-        const letraText = document.createElement('a-text');
-        letraText.setAttribute
+      <!-- Assets -->
+      <a-assets>
+        <img id="feliz" src="estrela-feliz.png" />
+        <img id="triste" src="estrela-triste.png" />
+      </a-assets>
+    </a-scene>
+  </body>
+</html>
