@@ -1,59 +1,138 @@
-<script>
-  AFRAME.registerComponent('gaze-move-controller', {
-    schema: { speed: { type: 'number', default: 1.5 } },
-    init: function () {
-      this.direction = new THREE.Vector3();
-      this.moving = false;
-      this.cameraEl = this.el.querySelector('a-camera');
-      this.aproximado = false; // trava a aproximação após chegar a 1.5m
-    },
-    tick: function (time, deltaTime) {
-      if (!this.moving || this.aproximado) return;
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sala de Estudo VR</title>
+    <meta name="description" content="Experiência de digitação com gaze" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent("gaze-activate-move", {
+        schema: {
+          target: { type: "selector" },
+        },
+        init: function () {
+          this.el.addEventListener("click", () => {
+            if (this.moved || !this.data.target) return;
 
-      const rig = this.el;
-      const lousa = document.querySelector('#lousa');
+            this.moved = true;
+            const camera = this.data.target.object3D;
+            const lousa = this.el.object3D;
 
-      const camPos = rig.object3D.position;
-      const lousaPos = lousa.object3D.position;
+            this.direction = new THREE.Vector3();
+            this.direction.subVectors(lousa.position, camera.position).normalize();
+            this.speed = 0.02;
+            this.limiteDistancia = 1.5;
+            this.moving = true;
 
-      this.cameraEl.object3D.getWorldDirection(this.direction);
-      this.direction.y = 0;
-      this.direction.normalize();
+            this.tick = () => {
+              if (!this.moving) return;
 
-      const dx = camPos.x - lousaPos.x;
-      const dz = camPos.z - lousaPos.z;
-      const distXZ = Math.sqrt(dx * dx + dz * dz);
+              const distance = camera.position.distanceTo(lousa.position);
+              if (distance > this.limiteDistancia) {
+                camera.position.addScaledVector(this.direction, this.speed);
+              } else {
+                this.moving = false;
+                document.querySelector("#teclado").setAttribute("visible", true);
+                document.querySelector("#campoTexto").setAttribute("visible", true);
+                document.querySelector("#palavraNinho").setAttribute("visible", true);
+              }
+            };
+          });
+        },
+      });
 
-      const limiteDistancia = 1.5; // 1,5 metros
+      AFRAME.registerComponent("verificar-palavra", {
+        init: function () {
+          this.el.addEventListener("click", () => {
+            const texto = document.querySelector("#campoTexto");
+            const valor = texto.getAttribute("value").toLowerCase();
+            const estrelaContente = document.querySelector("#estrelaContente");
+            const estrelaTriste = document.querySelector("#estrelaTriste");
 
-      if (distXZ > limiteDistancia) {
-        const delta = this.data.speed * (deltaTime / 1000);
-        const moveVector = this.direction.clone().multiplyScalar(-delta);
+            if (valor === "ninho") {
+              estrelaContente.setAttribute("visible", true);
+              setTimeout(() => estrelaContente.setAttribute("visible", false), 5000);
+            } else {
+              estrelaTriste.setAttribute("visible", true);
+              setTimeout(() => estrelaTriste.setAttribute("visible", false), 5000);
+            }
 
-        const novaX = camPos.x + moveVector.x;
-        const novaZ = camPos.z + moveVector.z;
+            texto.setAttribute("value", "");
+          });
+        },
+      });
 
-        const novaDistXZ = Math.sqrt(
-          (novaX - lousaPos.x) * (novaX - lousaPos.x) +
-          (novaZ - lousaPos.z) * (novaZ - lousaPos.z)
-        );
-
-        if (novaDistXZ <= limiteDistancia) {
-          const dirParaLousa = new THREE.Vector3(
-            lousaPos.x - camPos.x,
-            0,
-            lousaPos.z - camPos.z
-          ).normalize();
-
-          rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
-          rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
-
-          this.aproximado = true;
-        } else {
-          rig.object3D.position.x = novaX;
-          rig.object3D.position.z = novaZ;
+      function adicionarLetra(letra) {
+        const texto = document.querySelector("#campoTexto");
+        const atual = texto.getAttribute("value");
+        if (!atual.includes(letra)) {
+          texto.setAttribute("value", atual + letra);
         }
       }
-    }
-  });
-</script>
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Câmera e cursor gaze -->
+      <a-entity id="cameraRig">
+        <a-camera position="0 1.6 4">
+          <a-cursor
+            fuse="true"
+            fuse-timeout="2000"
+            material="color: red; shader: flat"
+          ></a-cursor>
+        </a-camera>
+      </a-entity>
+
+      <!-- Lousa com comportamento de mover-se até ela -->
+      <a-plane id="lousa" gaze-activate-move="target: #cameraRig"
+        position="0 2 -3" width="3" height="2" color="#333">
+      </a-plane>
+
+      <!-- Palavra "ninho" -->
+      <a-text id="palavraNinho" value="ninho" position="0 2.8 -3"
+        align="center" width="4" visible="false"></a-text>
+
+      <!-- Campo de texto -->
+      <a-text id="campoTexto" value="" position="0 2.3 -3" align="center"
+        width="4" color="white" visible="false"></a-text>
+
+      <!-- Teclado -->
+      <a-entity id="teclado" visible="false">
+        <a-box position="-1 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
+          onclick="adicionarLetra('n')"></a-box>
+        <a-box position="-0.6 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
+          onclick="adicionarLetra('i')"></a-box>
+        <a-box position="-0.2 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
+          onclick="adicionarLetra('h')"></a-box>
+        <a-box position="0.2 1.7 -3" depth="0.1" height="0.3" width="0.3" color="blue"
+          onclick="adicionarLetra('o')"></a-box>
+        <a-box id="btnEnter" position="0.8 1.7 -3" depth="0.1" height="0.3" width="0.5" color="green"
+          verificar-palavra></a-box>
+      </a-entity>
+
+      <!-- Estrela contente -->
+      <a-image id="estrelaContente" src="#estrelaContenteImg" position="0 2.5 -3"
+        width="1" height="1" visible="false"></a-image>
+
+      <!-- Estrela triste -->
+      <a-image id="estrelaTriste" src="#estrelaTristeImg" position="0 2.5 -3"
+        width="1" height="1" visible="false"></a-image>
+
+      <!-- Imagens usadas -->
+      <a-assets>
+        <img id="estrelaContenteImg" src="estrela-contente.png">
+        <img id="estrelaTristeImg" src="estrela-triste.png">
+      </a-assets>
+
+      <!-- Elementos adicionais do ambiente -->
+      <a-box position="2 0.5 -3" width="0.5" height="1" depth="0.5" color="#FFC65D"></a-box>
+      <a-sphere position="-2 0.5 -3" radius="0.5" color="#EF2D5E"></a-sphere>
+      <a-plane position="0 0 -4" width="10" height="10" rotation="-90 0 0" color="#7BC8A4"></a-plane>
+
+      <!-- Interruptor e outros elementos do usuário -->
+      <a-box position="-1.5 1.5 -2.9" width="0.2" height="0.4" depth="0.05" color="#999"></a-box>
+      <a-box position="1.5 1.5 -2.9" width="1" height="1" depth="0.05" color="#fff"></a-box> <!-- Janela -->
+    </a-scene>
+  </body>
+</html>
