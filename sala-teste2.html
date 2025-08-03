@@ -1,326 +1,176 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-teleport-controls/dist/aframe-teleport-controls.min.js"></script>
-  <style>
-    body { margin: 0; overflow: hidden; background: #fcefdc; }
-  </style>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sala de Estudo com Teclado Virtual</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+    <script>
+      let userMoved = false;
+      let camera;
+      let originalPosition;
+      let enteredText = '';
+      let textEntity;
+      let keyboard;
+      let inputAllowed = true;
 
-  <script>
-    AFRAME.registerComponent('gaze-move-controller', {
-      schema: { speed: { type: 'number', default: 4.5 } },
-      init: function () {
-        this.direction = new THREE.Vector3();
-        this.moving = false;
-        this.cameraEl = this.el.querySelector('a-camera');
-      },
-      tick: function (time, deltaTime) {
-        if (!this.moving) return;
-
-        const rig = this.el;
-        const lousa = document.querySelector('#lousa');
-
-        const camPos = rig.object3D.position;
-        const lousaPos = lousa.object3D.position;
-
-        this.cameraEl.object3D.getWorldDirection(this.direction);
-        this.direction.y = 0;
-        this.direction.normalize();
-
-        // Calcula distância atual no plano XZ
-        const dx = camPos.x - lousaPos.x;
-        const dz = camPos.z - lousaPos.z;
-        const distXZ = Math.sqrt(dx * dx + dz * dz);
-
-        const limiteDistancia = 0.5; // 50 cm limite
-
-        if (distXZ > limiteDistancia) {
-          const delta = this.data.speed * (deltaTime / 1000);
-          const moveVector = this.direction.clone().multiplyScalar(-delta);
-
-          // Posição nova proposta
-          const novaX = camPos.x + moveVector.x;
-          const novaZ = camPos.z + moveVector.z;
-
-          // Distância nova depois do movimento
-          const novaDistXZ = Math.sqrt(
-            (novaX - lousaPos.x) * (novaX - lousaPos.x) +
-            (novaZ - lousaPos.z) * (novaZ - lousaPos.z)
-          );
-
-          if (novaDistXZ <= limiteDistancia) {
-            // Posiciona exatamente a 50 cm da lousa
-            const dirParaLousa = new THREE.Vector3(
-              lousaPos.x - camPos.x,
-              0,
-              lousaPos.z - camPos.z
-            ).normalize();
-
-            rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
-            rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
-          } else {
-            rig.object3D.position.x = novaX;
-            rig.object3D.position.z = novaZ;
-          }
+      AFRAME.registerComponent('init-scene', {
+        init: function () {
+          camera = document.querySelector('[camera]');
+          originalPosition = camera.getAttribute('position');
+          textEntity = document.querySelector('#textInput');
+          keyboard = document.querySelector('#keyboard');
+          keyboard.setAttribute('visible', false);
         }
-      }
-    });
-
-    AFRAME.registerComponent('gaze-activate-move', {
-      init: function () {
-        const rig = document.querySelector('#cameraRig');
-        this.timeout = null;
-
-        this.el.addEventListener('mouseenter', () => {
-          this.timeout = setTimeout(() => {
-            if (rig.components['gaze-move-controller']) {
-              rig.components['gaze-move-controller'].moving = true;
-            }
-
-            // Mostrar palavra e teclado ao iniciar movimento
-            const imagem = document.querySelector('#imagem-ninho');
-            const textoDigitado = document.querySelector('#texto-digitado');
-            const teclado = document.querySelector('#teclado');
-            const tamanhoOriginal = { width: 1, height: 0.5 };
-
-            imagem.setAttribute('visible', true);
-            textoDigitado.setAttribute('visible', true);
-            textoDigitado.setAttribute('value', '');
-            imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', tamanhoOriginal.width.toString());
-            imagem.setAttribute('height', tamanhoOriginal.height.toString());
-            imagem.setAttribute('position', '0 3 -4.9');
-            teclado.setAttribute('visible', true);
-          }, 2000); // 2 segundos fixando olhar ativa movimento
-        });
-
-        this.el.addEventListener('mouseleave', () => {
-          clearTimeout(this.timeout);
-          if (rig.components['gaze-move-controller']) {
-            rig.components['gaze-move-controller'].moving = false;
-          }
-        });
-      }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const lousa = document.querySelector('#lousa');
-      if (lousa) {
-        lousa.setAttribute('gaze-activate-move', '');
-      }
-    });
-  </script>
-</head>
-
-<body>
-  <a-scene>
-    <!-- Assets -->
-    <a-assets>
-      <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
-      <img id="img-ninho" src="palavraninho.png" />
-      <img id="img-estrela" src="estrelacontente.png" />
-      <img id="img-estrela-triste" src="estrelatriste.png" />
-    </a-assets>
-
-    <!-- Luz ambiente -->
-    <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
-
-    <!-- Piso e teto -->
-    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
-    <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
-
-    <!-- Lustre -->
-    <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
-
-    <!-- Paredes -->
-    <a-plane width="10" height="5" position="0 2.5 -5" rotation="0 0 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
-
-    <!-- Porta -->
-    <a-image src="porta.png" width="2" height="4" position="0 1.9 4.95" rotation="0 180 0"></a-image>
-
-    <!-- Lousa -->
-    <a-image id="lousa" interacao-lousa src="lousaembranco2.png" width="5.6" height="3.1" position="0 2.5 -4.95" gaze-activate-move></a-image>
-
-    <!-- Palavra ou estrela -->
-    <a-image id="imagem-ninho" src="#img-ninho" width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
-
-    <!-- Texto digitado -->
-    <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" visible="false"></a-text>
-
-    <!-- Teclado -->
-    <a-entity id="teclado" visible="false"></a-entity>
-
-    <!-- Objetos da sala -->
-    <a-image src="tapete.png" width="5" height="7" rotation="-90 0 0" position="-3 0.01 1"></a-image>
-    <a-image src="ponteirotwister.png" width="0.9" height="0.9" rotation="-90 0 0" position="-1.2 0.02 2"></a-image>
-    <a-image src="tatame.png" width="4" height="4" rotation="-90 0 0" position="2.7 0.01 1"></a-image>
-    <a-image src="quebra-cabeca.png" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
-    <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
-    <a-image src="jogo-da-velha-feltro2.png" width="1.5" height="1.5" position="3 1.5 4.94" rotation="0 180 0"></a-image>
-    <a-image src="interruptor-branco.png" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
-    <a-image src="relogio2.png" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
-    <a-image src="nuvem2.png" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
-    <a-image src="nuvem2.png" width="2" height="1.7" position="-3.5 3.5 -4.95"></a-image>
-
-    <!-- Cadeira -->
-    <a-entity id="cadeira" gltf-model="#modeloCadeira" position="3 0 -3" scale="0.8 0.8 0.8" static-body></a-entity>
-
-    <!-- Câmera com movimento livre e gaze vermelho -->
-    <a-entity id="cameraRig" position="0 1.6 0" gaze-move-controller>
-      <a-camera look-controls wasd-controls-enabled="true">
-        <a-cursor fuse="true" fuse-timeout="2000" color="red" geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02" material="color: red; shader: flat" position="0 0 -1"></a-cursor>
-      </a-camera>
-    </a-entity>
-
-    <!-- Teleporte para VR -->
-    <a-entity id="teleportRig" position="0 0 0">
-      <a-entity laser-controls="hand: right"></a-entity>
-      <a-entity teleport-controls="cameraRig: #cameraRig; button: trigger; collisionEntities: .piso;"></a-entity>
-    </a-entity>
-  </a-scene>
-
-  <script>
-    const imagem = document.querySelector('#imagem-ninho');
-    const teclado = document.querySelector('#teclado');
-    const textoDigitado = document.querySelector('#texto-digitado');
-
-    const tamanhoOriginal = { width: 1, height: 0.5 };
-    let tecladoCriado = false;
-
-    AFRAME.registerComponent('interacao-lousa', {
-      init: function () {
-        this.el.addEventListener('mouseenter', () => {
-          this.timeout = setTimeout(() => {
-            imagem.setAttribute('visible', true);
-            textoDigitado.setAttribute('visible', true);
-            textoDigitado.setAttribute('value', '');
-            imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', tamanhoOriginal.width.toString());
-            imagem.setAttribute('height', tamanhoOriginal.height.toString());
-            imagem.setAttribute('position', '0 3 -4.9');
-
-            if (!tecladoCriado) {
-              criarTeclado();
-              tecladoCriado = true;
-            }
-
-            teclado.setAttribute('visible', true);
-          }, 2000);
-        });
-
-        this.el.addEventListener('mouseleave', () => {
-          clearTimeout(this.timeout);
-        });
-      }
-    });
-
-    function criarTeclado() {
-      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-      const espacamentoX = 0.3;
-      const espacamentoY = 0.3;
-      const startX = -6 * espacamentoX;
-      const startY = 1.9;
-      const corTecla = '#ffffff';
-      const opacidadeTecla = 0.2;
-
-      letras.forEach((letra, index) => {
-        const linha = index < 13 ? 0 : 1;
-        const col = index % 13;
-        const x = startX + col * espacamentoX;
-        const y = startY - linha * espacamentoY;
-
-        const plano = document.createElement('a-plane');
-        plano.setAttribute('width', 0.35);
-        plano.setAttribute('height', 0.35);
-        plano.setAttribute('color', corTecla);
-        plano.setAttribute('opacity', opacidadeTecla);
-        plano.setAttribute('position', `${x} ${y} -4.9`);
-
-        const letraText = document.createElement('a-text');
-        letraText.setAttribute('value', letra);
-        letraText.setAttribute('color', '#000');
-        letraText.setAttribute('align', 'center');
-        letraText.setAttribute('width', '2');
-        letraText.setAttribute('position', '0 0 0.02');
-
-        plano.appendChild(letraText);
-
-        plano.addEventListener('click', () => {
-          let textoAtual = textoDigitado.getAttribute('value');
-          if (!textoAtual.endsWith(letra)) {
-            textoDigitado.setAttribute('value', textoAtual + letra);
-          }
-        });
-
-        teclado.appendChild(plano);
       });
 
-      criarBotaoExtra(
-        'Apagar',
-        -1,
-        startY - 2 * espacamentoY,
-        () => {
-          let textoAtual = textoDigitado.getAttribute('value');
-          if (textoAtual.length > 0) {
-            textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
-          }
-        },
-        corTecla,
-        opacidadeTecla
-      );
+      AFRAME.registerComponent('activate-on-gaze', {
+        init: function () {
+          this.el.addEventListener('click', () => {
+            if (!userMoved) {
+              moveToLousa();
+            }
+          });
+        }
+      });
 
-      criarBotaoExtra(
-        'Entrar',
-        1,
-        startY - 2 * espacamentoY,
-        () => {
-          const texto = textoDigitado.getAttribute('value').trim().toUpperCase();
+      function moveToLousa() {
+        const cameraRig = document.querySelector('#cameraRig');
+        cameraRig.setAttribute('animation__move', {
+          property: 'position',
+          to: '0 1.6 -4.5',
+          dur: 2000,
+          easing: 'easeInOutQuad'
+        });
 
-          if (texto === 'NINHO') {
-            imagem.setAttribute('src', '#img-estrela');
-            imagem.setAttribute('width', '0.8');
-            imagem.setAttribute('height', '1.2');
-            imagem.setAttribute('position', '0 3 -4.8');
-          } else {
-            imagem.setAttribute('src', '#img-estrela-triste');
-            imagem.setAttribute('material', 'transparent: true');
-            imagem.setAttribute('width', '1.7');
-            imagem.setAttribute('height', '1.5');
-            imagem.setAttribute('position', '0 3 -4.8');
-          }
-          // Apaga todo o texto digitado ao clicar em Entrar
-          textoDigitado.setAttribute('value', '');
-        },
-        corTecla,
-        opacidadeTecla
-      );
-    }
+        setTimeout(() => {
+          showKeyboard();
+        }, 2100);
 
-    function criarBotaoExtra(texto, x, y, callback, cor, opacidade) {
-      const plano = document.createElement('a-plane');
-      plano.setAttribute('width', 1);
-      plano.setAttribute('height', 0.3);
-      plano.setAttribute('color', cor);
-      plano.setAttribute('opacity', opacidade);
-      plano.setAttribute('position', `${x} ${y} -4.9`);
+        userMoved = true;
+      }
 
-      const textoEntity = document.createElement('a-text');
-      textoEntity.setAttribute('value', texto);
-      textoEntity.setAttribute('align', 'center');
-      textoEntity.setAttribute('color', '#000');
-      textoEntity.setAttribute('width', '2');
-      textoEntity.setAttribute('position', '0 0 0.02');
+      function showKeyboard() {
+        document.querySelector('#textInput').setAttribute('visible', true);
+        document.querySelector('#keyboard').setAttribute('visible', true);
+        inputAllowed = true;
+      }
 
-      plano.appendChild(textoEntity);
-      plano.addEventListener('click', callback);
-      teclado.appendChild(plano);
-    }
-  </script>
-</body>
+      function hideKeyboard() {
+        document.querySelector('#textInput').setAttribute('visible', false);
+        document.querySelector('#keyboard').setAttribute('visible', false);
+        inputAllowed = false;
+      }
+
+      function addLetter(letter) {
+        if (!inputAllowed) return;
+        enteredText += letter;
+        updateText();
+      }
+
+      function eraseLetter() {
+        if (!inputAllowed) return;
+        enteredText = enteredText.slice(0, -1);
+        updateText();
+      }
+
+      function updateText() {
+        textEntity.setAttribute('value', enteredText);
+      }
+
+      function submitWord() {
+        if (!inputAllowed) return;
+
+        hideKeyboard();
+
+        if (enteredText.toLowerCase() === 'ninho') {
+          showStar('happy');
+          setTimeout(() => {
+            document.querySelector('#happyStar').setAttribute('visible', false);
+            enteredText = '';
+            updateText();
+          }, 2000);
+        } else {
+          showStar('sad');
+          setTimeout(() => {
+            document.querySelector('#sadStar').setAttribute('visible', false);
+            enteredText = '';
+            updateText();
+            showKeyboard();
+          }, 2000);
+        }
+      }
+
+      function showStar(type) {
+        const star = document.querySelector(`#${type}Star`);
+        star.setAttribute('visible', true);
+      }
+    </script>
+  </head>
+  <body>
+    <a-scene init-scene>
+      <!-- Câmera com cursor -->
+      <a-entity id="cameraRig" position="0 1.6 0">
+        <a-entity camera look-controls>
+          <a-entity
+            cursor="fuse: true; fuseTimeout: 2000"
+            position="0 0 -1"
+            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+            material="color: red; shader: flat"
+          ></a-entity>
+        </a-entity>
+      </a-entity>
+
+      <!-- Lousa -->
+      <a-plane position="0 2 -6" rotation="-10 0 0" width="4" height="2.5" color="#333" activate-on-gaze></a-plane>
+
+      <!-- Texto digitado -->
+      <a-entity
+        id="textInput"
+        position="0 2.8 -6"
+        text="value: ; color: white; align: center; width: 4"
+        visible="false"
+      ></a-entity>
+
+      <!-- Teclado -->
+      <a-entity id="keyboard" visible="false">
+        <a-plane position="0 1.5 -6" width="3" height="1.5" color="#111"></a-plane>
+
+        <!-- Letras -->
+        <a-entity id="letters">
+          <a-plane position="-1 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: N; align: center" 
+                   event-set__click="_event: click; _target: #keyboard; _delay: 0; _call: addLetter('N')"></a-plane>
+
+          <a-plane position="-0.5 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: I; align: center"
+                   onclick="addLetter('I')"></a-plane>
+
+          <a-plane position="0 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: H; align: center"
+                   onclick="addLetter('H')"></a-plane>
+
+          <a-plane position="0.5 2 -6" width="0.4" height="0.4" color="#FFD700" text="value: O; align: center"
+                   onclick="addLetter('O')"></a-plane>
+        </a-entity>
+
+        <!-- Botão Apagar -->
+        <a-plane position="-0.75 1.5 -6" width="0.6" height="0.3" color="#FF6347" text="value: Apagar; align: center"
+                 onclick="eraseLetter()"></a-plane>
+
+        <!-- Botão Entrar -->
+        <a-plane position="0.75 1.5 -6" width="0.6" height="0.3" color="#32CD32" text="value: Entrar; align: center"
+                 onclick="submitWord()"></a-plane>
+      </a-entity>
+
+      <!-- Estrela feliz -->
+      <a-image id="happyStar" src="#happy" position="0 2.5 -6" width="1" height="1" visible="false"></a-image>
+
+      <!-- Estrela triste -->
+      <a-image id="sadStar" src="#sad" position="0 2.5 -6" width="1" height="1" visible="false"></a-image>
+
+      <!-- Assets das estrelas -->
+      <a-assets>
+        <img id="happy" src="estrela_contente.png">
+        <img id="sad" src="estrela_triste.png">
+      </a-assets>
+    </a-scene>
+  </body>
 </html>
