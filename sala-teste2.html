@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Sala de Estudo com Teclado Virtual</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-teleport-controls/dist/aframe-teleport-controls.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden; background: #fcefdc">
   <a-scene>
@@ -19,7 +20,7 @@
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
 
     <!-- Piso e teto -->
-    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0"></a-plane>
+    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
     <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
 
     <!-- Lustre -->
@@ -65,13 +66,24 @@
     <!-- Cadeira -->
     <a-entity id="cadeira" gltf-model="#modeloCadeira" position="3 0 -3" scale="0.8 0.8 0.8" static-body></a-entity>
 
-    <!-- Câmera com cursor gaze -->
-    <a-entity id="cameraRig" position="0 1.6 0">
-      <a-camera look-controls wasd-controls>
-        <a-cursor fuse="true" fuse-timeout="2000" color="white"
-                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
-                  position="0 0 -1"></a-cursor>
+    <!-- Câmera com movimento livre e gaze vermelho -->
+    <a-entity id="cameraRig" position="0 1.6 0" movement-controls="fly: true">
+      <a-camera look-controls wasd-controls-enabled="true">
+        <a-cursor 
+          fuse="true" 
+          fuse-timeout="2000" 
+          color="red"
+          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+          material="color: red; shader: flat"
+          position="0 0 -1">
+        </a-cursor>
       </a-camera>
+    </a-entity>
+
+    <!-- Teleporte para VR -->
+    <a-entity id="teleportRig" position="0 0 0">
+      <a-entity laser-controls="hand: right"></a-entity>
+      <a-entity teleport-controls="cameraRig: #cameraRig; button: trigger; collisionEntities: .piso;"></a-entity>
     </a-entity>
   </a-scene>
 
@@ -208,4 +220,3 @@
   </script>
 </body>
 </html>
-
