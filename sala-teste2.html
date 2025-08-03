@@ -16,9 +16,15 @@
         this.direction = new THREE.Vector3();
         this.moving = false;
         this.cameraEl = this.el.querySelector('a-camera');
+        this.aproximado = false; // flag para indicar se já aproximou
       },
       tick: function (time, deltaTime) {
         if (!this.moving) return;
+
+        if (this.aproximado) {
+          // Se já aproximou, trava movimento (não deixa avançar)
+          return;
+        }
 
         const rig = this.el;
         const lousa = document.querySelector('#lousa');
@@ -35,7 +41,7 @@
         const dz = camPos.z - lousaPos.z;
         const distXZ = Math.sqrt(dx * dx + dz * dz);
 
-        const limiteDistancia = 1; // 50 cm
+        const limiteDistancia = 0.5; // 50 cm
 
         if (distXZ > limiteDistancia) {
           const delta = this.data.speed * (deltaTime / 1000);
@@ -61,6 +67,8 @@
 
             rig.object3D.position.x = lousaPos.x - dirParaLousa.x * limiteDistancia;
             rig.object3D.position.z = lousaPos.z - dirParaLousa.z * limiteDistancia;
+
+            this.aproximado = true; // travar movimento a partir daqui
           } else {
             rig.object3D.position.x = novaX;
             rig.object3D.position.z = novaZ;
@@ -101,6 +109,7 @@
           clearTimeout(this.timeout);
           if (rig.components['gaze-move-controller']) {
             rig.components['gaze-move-controller'].moving = false;
+            rig.components['gaze-move-controller'].aproximado = false; // resetar flag para poder se aproximar novamente se olhar sair e voltar
           }
         });
       }
@@ -428,24 +437,4 @@
     }
 
     function criarBotaoExtra(texto, x, y, callback, cor, opacidade) {
-      const plano = document.createElement('a-plane');
-      plano.setAttribute('width', 1);
-      plano.setAttribute('height', 0.3);
-      plano.setAttribute('color', cor);
-      plano.setAttribute('opacity', opacidade);
-      plano.setAttribute('position', `${x} ${y} -4.9`);
-
-      const textoEntity = document.createElement('a-text');
-      textoEntity.setAttribute('value', texto);
-      textoEntity.setAttribute('align', 'center');
-      textoEntity.setAttribute('color', '#000');
-      textoEntity.setAttribute('width', '2');
-      textoEntity.setAttribute('position', '0 0 0.02');
-
-      plano.appendChild(textoEntity);
-      plano.addEventListener('click', callback);
-      teclado.appendChild(plano);
-    }
-  </script>
-</body>
-</html>
+      const plano = document.createElement('a
