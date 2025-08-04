@@ -5,7 +5,6 @@
   <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script>
-    // Componente original de teleport via mouseenter/mouseleave com delay de 2s
     AFRAME.registerComponent('gaze-teleport-jogo', {
       init: function () {
         this.el.addEventListener('mouseenter', () => {
@@ -17,7 +16,7 @@
               const cameraRig = document.querySelector('#cameraRig');
               cameraRig.setAttribute('animation__moveToJogo', {
                 property: 'position',
-                to: '2.8 1 3.5',  // altura 1 para criança
+                to: '2.8 1.6 3.5',  // posição ajustada para frente da imagem do jogo
                 dur: 2000,
                 easing: 'easeInOutQuad'
               });
@@ -27,57 +26,6 @@
         this.el.addEventListener('mouseleave', () => {
           clearInterval(this.checkGaze);
         });
-      }
-    });
-
-    // Novo componente para teletransporte ao fixar olhar por 2 segundos (usando dot product para detectar direção do olhar)
-    AFRAME.registerComponent('gaze-move', {
-      schema: {
-        targetPosition: { type: 'vec3' },
-        gazeTime: { type: 'int', default: 2000 }
-      },
-      init: function () {
-        this.gazeStartTime = null;
-        this.camera = document.querySelector('[camera]').object3D;
-      },
-      tick: function (time) {
-        const camera = this.camera;
-        const el = this.el.object3D;
-        const direction = new THREE.Vector3();
-        camera.getWorldDirection(direction);
-
-        const gazeVector = new THREE.Vector3().subVectors(el.position, camera.position).normalize();
-        const dot = direction.dot(gazeVector);
-
-        const isLooking = dot > 0.99; // ajuste a sensibilidade se quiser
-
-        if (isLooking) {
-          if (!this.gazeStartTime) {
-            this.gazeStartTime = time;
-          } else if (time - this.gazeStartTime >= this.data.gazeTime) {
-            const cameraRig = document.querySelector('#cameraRig');
-            cameraRig.setAttribute('animation__move', {
-              property: 'position',
-              to: `${this.data.targetPosition.x} ${this.data.targetPosition.y} ${this.data.targetPosition.z}`,
-              dur: 2000,
-              easing: 'easeInOutQuad'
-            });
-            this.gazeStartTime = null; // resetar
-          }
-        } else {
-          this.gazeStartTime = null;
-        }
-      }
-    });
-
-    // Fixar a altura da câmera em 1 metro (altura de criança)
-    AFRAME.registerComponent('fixar-altura-camera', {
-      tick: function () {
-        const rig = this.el;
-        const pos = rig.getAttribute('position');
-        if (pos.y !== 1) {
-          rig.setAttribute('position', { x: pos.x, y: 1, z: pos.z });
-        }
       }
     });
   </script>
@@ -149,10 +97,9 @@
       src="#jogo"
       width="1.5"
       height="1.5"
-      position="2.8 1 4.95"
+      position="2.8 2 4.95"
       rotation="0 180 0"
       gaze-teleport-jogo
-      gaze-move="targetPosition: 2.8 1 3.5"
     ></a-image>
 
     <a-image src="interruptor-branco.png" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
@@ -168,7 +115,7 @@
       static-body
     ></a-entity>
 
-    <a-entity id="cameraRig" position="0 1 0" fixar-altura-camera>
+    <a-entity id="cameraRig" position="0 1.6 0">
       <a-camera look-controls wasd-controls-enabled="true">
         <a-cursor
           fuse="true"
