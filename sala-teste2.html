@@ -1,56 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <title>Sala de Estudo com Jogo da Velha</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+</head>
+<body>
+  <a-scene>
+    <!-- Câmera na altura de uma criança (1 metro) -->
+    <a-entity id="cameraRig" position="0 1 4.5">
+      <a-camera id="camera" wasd-controls-enabled="false"></a-camera>
+    </a-entity>
+
+    <!-- Sala -->
+    <a-box position="0 0.5 -5" width="10" height="1" depth="10" color="#ccc"></a-box>
+    <a-box position="0 3.5 -10" width="10" height="6" depth="0.1" color="#f0f0f0"></a-box> <!-- parede do fundo -->
+    <a-box position="0 3.5 0" width="10" height="6" depth="0.1" rotation="0 180 0" color="#e0e0e0"></a-box> <!-- parede oposta -->
+    <a-box position="-5 3.5 -5" width="0.1" height="6" depth="10" color="#e0e0e0"></a-box> <!-- esquerda -->
+    <a-box position="5 3.5 -5" width="0.1" height="6" depth="10" color="#e0e0e0"></a-box> <!-- direita -->
+    <a-box position="0 6.5 -5" width="10" height="1" depth="10" color="#ccc"></a-box> <!-- teto -->
+
+    <!-- Porta (na parede do fundo) -->
+    <a-box position="0 1.5 -10.05" width="2" height="3" depth="0.1" color="#8B4513"></a-box>
+
+    <!-- Jogo da velha (imagem na parede do fundo, à direita da porta) -->
+    <a-image id="jogo" src="#imgJogo" position="2.5 1 -9.95" width="1.5" height="1.5" look-at="#camera" class="gaze-target"></a-image>
+    <a-assets>
+      <img id="imgJogo" src="jogo-da-velha-feltro2.png">
+    </a-assets>
+
+    <!-- Gaze-trigger para mover até o jogo -->
+    <a-entity id="gaze-listener"
+              geometry="primitive: plane; height: 1.5; width: 1.5"
+              material="color: transparent; opacity: 0"
+              position="2.5 1 -9.94"
+              class="gaze-target"
+              gaze-listener>
+    </a-entity>
+
     <script>
-      AFRAME.registerComponent('gaze-listener-jogo', {
+      AFRAME.registerComponent('gaze-listener', {
         init: function () {
-          let timeout;
-          this.el.addEventListener('mouseenter', () => {
-            timeout = setTimeout(() => {
-              const camera = document.querySelector('#cameraRig');
-              camera.setAttribute('animation__move', {
+          let el = this.el;
+          let timer;
+          el.addEventListener('mouseenter', function () {
+            timer = setTimeout(() => {
+              // Mover a câmera automaticamente a 2m da imagem do jogo
+              const rig = document.querySelector('#cameraRig');
+              rig.setAttribute('animation__move', {
                 property: 'position',
-                to: '1.5 1.6 -2', // Câmera se move para 2 metros em frente ao jogo
-                dur: 2000,
+                to: '2.5 1 -7.95', // 2m de distância da parede do jogo, altura 1m
+                dur: 1500,
                 easing: 'easeInOutQuad'
               });
             }, 2000); // 2 segundos de olhar fixo
           });
-          this.el.addEventListener('mouseleave', () => {
-            clearTimeout(timeout);
+          el.addEventListener('mouseleave', function () {
+            clearTimeout(timer);
           });
         }
       });
     </script>
-  </head>
-  <body>
-    <a-scene>
-      <!-- Câmera -->
-      <a-entity id="cameraRig" position="0 1.6 4.5">
-        <a-camera wasd-controls-enabled="false"></a-camera>
-      </a-entity>
-
-      <!-- Sala -->
-      <a-box position="0 0 -5" width="10" height="5" depth="0.1" color="#ffffff"></a-box> <!-- Parede da frente -->
-      <a-box position="0 0 5" width="10" height="5" depth="0.1" color="#cccccc"></a-box> <!-- Parede de trás -->
-      <a-box position="-5 0 0" width="0.1" height="5" depth="10" color="#cccccc"></a-box> <!-- Parede esquerda -->
-      <a-box position="5 0 0" width="0.1" height="5" depth="10" color="#cccccc"></a-box> <!-- Parede direita -->
-      <a-plane position="0 -2.5 0" rotation="-90 0 0" width="10" height="10" color="#e6e6e6"></a-plane> <!-- Piso -->
-      <a-plane position="0 2.5 0" rotation="90 0 0" width="10" height="10" color="#f2f2f2"></a-plane> <!-- Teto -->
-
-      <!-- Porta na parede da frente -->
-      <a-box position="-2 0 -4.95" width="1" height="2" depth="0.05" color="#888888"></a-box>
-
-      <!-- Imagem do jogo-da-velha à direita da porta -->
-      <a-image src="#jogo" position="1.5 1 -4.94" width="1.2" height="1.2" gaze-listener-jogo></a-image>
-
-      <!-- Assets -->
-      <a-assets>
-        <img id="jogo" src="jogo-da-velha-feltro2.png" crossorigin="anonymous">
-      </a-assets>
-    </a-scene>
-  </body>
+  </a-scene>
+</body>
 </html>
