@@ -4,93 +4,32 @@
   <meta charset="utf-8" />
   <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-teleport-controls/dist/aframe-teleport-controls.min.js"></script>
-  <style>
-    body { margin: 0; overflow: hidden; background: #fcefdc; }
-  </style>
-
   <script>
-    AFRAME.registerComponent('gaze-move-controller', {
-      schema: { speed: { type: 'number', default: 1.5 } },
+    AFRAME.registerComponent('gaze-teleport-jogo', {
       init: function () {
-        this.direction = new THREE.Vector3();
-        this.moving = false;
-        this.cameraEl = this.el.querySelector('a-camera');
-      },
-      tick: function (time, deltaTime) {
-        if (!this.moving) return;
-
-        const rig = this.el;
-        const lousa = document.querySelector('#lousa');
-
-        const camPos = rig.object3D.position;
-        const lousaPos = lousa.object3D.position;
-
-        this.cameraEl.object3D.getWorldDirection(this.direction);
-        this.direction.y = 0;
-        this.direction.normalize();
-
-        const limiteDistancia = 4.5; // distância fixa 4,5m da lousa
-
-        const dirParaLousa = new THREE.Vector3(
-          camPos.x - lousaPos.x,
-          0,
-          camPos.z - lousaPos.z
-        ).normalize();
-
-        rig.object3D.position.x = lousaPos.x + dirParaLousa.x * limiteDistancia;
-        rig.object3D.position.z = lousaPos.z + dirParaLousa.z * limiteDistancia;
-      }
-    });
-
-    AFRAME.registerComponent('gaze-activate-move', {
-      init: function () {
-        const rig = document.querySelector('#cameraRig');
-        this.timeout = null;
-
         this.el.addEventListener('mouseenter', () => {
-          if (window.finalizou) return; // bloqueia se estiver na fase estrela contente
-
-          this.timeout = setTimeout(() => {
-            if (rig.components['gaze-move-controller']) {
-              rig.components['gaze-move-controller'].moving = true;
+          this.startTime = Date.now();
+          this.checkGaze = setInterval(() => {
+            const now = Date.now();
+            if (now - this.startTime >= 2000) {
+              clearInterval(this.checkGaze);
+              const cameraRig = document.querySelector('#cameraRig');
+              cameraRig.setAttribute('animation__moveToJogo', {
+                property: 'position',
+                to: '8 1.6 -4',
+                dur: 2000,
+                easing: 'easeInOutQuad'
+              });
             }
-
-            // Mostrar palavra e teclado ao iniciar movimento
-            const imagem = document.querySelector('#imagem-ninho');
-            const textoDigitado = document.querySelector('#texto-digitado');
-            const teclado = document.querySelector('#teclado');
-            const tamanhoOriginal = { width: 1, height: 0.5 };
-
-            imagem.setAttribute('visible', true);
-            textoDigitado.setAttribute('visible', true);
-            textoDigitado.setAttribute('value', '');
-            imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', tamanhoOriginal.width.toString());
-            imagem.setAttribute('height', tamanhoOriginal.height.toString());
-            imagem.setAttribute('position', '0 3 -4.9');
-            teclado.setAttribute('visible', true);
-          }, 2000);
+          }, 100);
         });
-
         this.el.addEventListener('mouseleave', () => {
-          clearTimeout(this.timeout);
-          if (rig.components['gaze-move-controller']) {
-            rig.components['gaze-move-controller'].moving = false;
-          }
+          clearInterval(this.checkGaze);
         });
-      }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const lousa = document.querySelector('#lousa');
-      if (lousa) {
-        lousa.setAttribute('gaze-activate-move', '');
       }
     });
   </script>
 </head>
-
 <body>
   <a-scene>
     <a-assets>
@@ -98,6 +37,7 @@
       <img id="img-ninho" src="palavraninho.png" />
       <img id="img-estrela" src="estrelacontente.png" />
       <img id="img-estrela-triste" src="estrelatriste.png" />
+      <img id="jogo" src="jogo-da-velha.png" />
     </a-assets>
 
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
@@ -150,7 +90,17 @@
     <a-image src="tatame.png" width="4" height="4" rotation="-90 0 0" position="2.7 0.01 1"></a-image>
     <a-image src="quebra-cabeca.png" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
     <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
-    <a-image src="jogo-da-velha-feltro2.png" width="1.5" height="1.5" position="3 1.5 4.94" rotation="0 180 0"></a-image>
+
+    <!-- Jogo da velha com componente de gaze para teleporte -->
+    <a-image
+      id="jogoDaVelha"
+      src="#jogo"
+      width="1.5"
+      height="1.5"
+      position="8 2 -6"
+      gaze-teleport-jogo
+    ></a-image>
+
     <a-image src="interruptor-branco.png" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
     <a-image src="relogio2.png" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
     <a-image src="nuvem2.png" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
@@ -164,7 +114,7 @@
       static-body
     ></a-entity>
 
-    <a-entity id="cameraRig" position="0 1.6 0" gaze-move-controller>
+    <a-entity id="cameraRig" position="0 1.6 0">
       <a-camera look-controls wasd-controls-enabled="true">
         <a-cursor
           fuse="true"
@@ -191,12 +141,12 @@
 
     const tamanhoOriginal = { width: 1, height: 0.5 };
     let tecladoCriado = false;
-    window.finalizou = false;
+    let finalizou = false;  // flag para bloquear reaparecimento
 
     AFRAME.registerComponent('interacao-lousa', {
       init: function () {
         this.el.addEventListener('mouseenter', () => {
-          if(window.finalizou) return;
+          if(finalizou) return;  // bloqueia se já finalizou com estrela contente
 
           this.timeout = setTimeout(() => {
             imagem.setAttribute('visible', true);
@@ -254,7 +204,7 @@
         plano.appendChild(letraText);
 
         plano.addEventListener('click', () => {
-          if(window.finalizou) return;
+          if(finalizou) return;  // bloqueia se finalizou com estrela contente
 
           let textoAtual = textoDigitado.getAttribute('value');
           if (!textoAtual.endsWith(letra)) {
@@ -270,7 +220,7 @@
         -1,
         startY - 2 * espacamentoY,
         () => {
-          if(window.finalizou) return;
+          if(finalizou) return;  // bloqueia se finalizou com estrela contente
 
           let textoAtual = textoDigitado.getAttribute('value');
           textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
@@ -284,26 +234,18 @@
         1,
         startY - 2 * espacamentoY,
         () => {
-          if(window.finalizou) return;
+          if(finalizou) return;  // bloqueia se finalizou com estrela contente
 
           const texto = textoDigitado.getAttribute('value').trim().toUpperCase();
 
           if (texto === 'NINHO') {
-            window.finalizou = true;
-
             imagem.setAttribute('src', '#img-estrela');
             imagem.setAttribute('width', '0.8');
             imagem.setAttribute('height', '1.2');
             imagem.setAttribute('position', '0 3 -4.8');
-
             textoDigitado.setAttribute('visible', false);
             teclado.setAttribute('visible', false);
-
-            // Depois de 3 segundos, esconde a estrela e reseta para novo ciclo
-            setTimeout(() => {
-              imagem.setAttribute('visible', false);
-              window.finalizou = false;
-            }, 3000);
+            finalizou = true; // bloqueia novas interações e reaparecimentos
           } else {
             imagem.setAttribute('src', '#img-estrela-triste');
             imagem.setAttribute('material', 'transparent: true');
