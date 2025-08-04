@@ -37,7 +37,7 @@
       <img id="img-ninho" src="palavraninho.png" />
       <img id="img-estrela" src="estrelacontente.png" />
       <img id="img-estrela-triste" src="estrelatriste.png" />
-      <img id="jogo" src="jogo-da-velha.png" />
+      <img id="jogo" src="jogo-da-velha-feltro2.png" />
     </a-assets>
 
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
@@ -91,13 +91,14 @@
     <a-image src="quebra-cabeca.png" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
     <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
 
-    <!-- Jogo da velha com componente de gaze para teleporte -->
+    <!-- Jogo da velha na mesma parede da porta, à direita da porta -->
     <a-image
       id="jogoDaVelha"
       src="#jogo"
       width="1.5"
       height="1.5"
-      position="8 2 -6"
+      position="1.5 2 4.95"
+      rotation="0 180 0"
       gaze-teleport-jogo
     ></a-image>
 
