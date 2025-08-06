@@ -101,32 +101,34 @@
       const apagar = document.createElement('a-plane');
       apagar.setAttribute('width', 1);
       apagar.setAttribute('height', 0.4);
-      apagar.setAttribute('color', '#fff');
-      apagar.setAttribute('opacity', 0.3);
-      apagar.setAttribute('position', '0.5 1.2 -4.9');
+      apagar.setAttribute('color', '#ff0000');
+      apagar.setAttribute('opacity', 0.4);
+      apagar.setAttribute('position', `-1.5 1.2 -4.9`);
+      apagar.setAttribute('class', 'botao');
 
       const textoApagar = document.createElement('a-text');
       textoApagar.setAttribute('value', 'Apagar');
       textoApagar.setAttribute('align', 'center');
-      textoApagar.setAttribute('color', '#000');
+      textoApagar.setAttribute('color', '#fff');
       textoApagar.setAttribute('width', '2');
       textoApagar.setAttribute('position', '0 0 0.01');
-      textoApagar.setAttribute('font', 'mozillavr');
-      apagar.appendChild(textoApagar);
 
+      apagar.appendChild(textoApagar);
       apagar.addEventListener('click', () => {
         let textoAtual = textoDigitado.getAttribute('value');
         textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
       });
+
       teclado.appendChild(apagar);
 
       // Botão Entrar
       const entrar = document.createElement('a-plane');
       entrar.setAttribute('width', 1);
       entrar.setAttribute('height', 0.4);
-      entrar.setAttribute('color', '#fff');
-      entrar.setAttribute('opacity', 0.3);
-      entrar.setAttribute('position', '-0.5 1.2 -4.9');
+      entrar.setAttribute('color', '#00ff00');
+      entrar.setAttribute('opacity', 0.4);
+      entrar.setAttribute('position', `1.5 1.2 -4.9`);
+      entrar.setAttribute('class', 'botao');
 
       const textoEntrar = document.createElement('a-text');
       textoEntrar.setAttribute('value', 'Entrar');
@@ -134,32 +136,30 @@
       textoEntrar.setAttribute('color', '#000');
       textoEntrar.setAttribute('width', '2');
       textoEntrar.setAttribute('position', '0 0 0.01');
-      textoEntrar.setAttribute('font', 'mozillavr');
-      entrar.appendChild(textoEntrar);
 
+      entrar.appendChild(textoEntrar);
       entrar.addEventListener('click', () => {
-        const texto = textoDigitado.getAttribute('value').toLowerCase();
-        const estrelaFeliz = document.querySelector('#estrela-feliz');
+        const texto = textoDigitado.getAttribute('value').toUpperCase();
+        const imagem = document.querySelector('#imagem-ninho');
+        const estrela = document.querySelector('#estrela');
         const estrelaTriste = document.querySelector('#estrela-triste');
-        const imagemNinho = document.querySelector('#imagem-ninho');
-        
-        if (texto === 'ninho') {
-          estrelaFeliz.setAttribute('visible', true);
+        const teclado = document.querySelector('#teclado');
+
+        imagem.setAttribute('visible', false);
+        teclado.setAttribute('visible', false);
+
+        if (texto === "NINHO") {
+          estrela.setAttribute('visible', true);
+          setTimeout(() => estrela.setAttribute('visible', false), 3000);
         } else {
           estrelaTriste.setAttribute('visible', true);
+          setTimeout(() => {
+            estrelaTriste.setAttribute('visible', false);
+            imagem.setAttribute('visible', true);
+            teclado.setAttribute('visible', true);
+          }, 3000);
         }
-
-        // Esconde o teclado e imagem temporariamente
-        teclado.setAttribute('visible', false);
-        imagemNinho.setAttribute('visible', false);
-
-        setTimeout(() => {
-          estrelaFeliz.setAttribute('visible', false);
-          estrelaTriste.setAttribute('visible', false);
-          imagemNinho.setAttribute('visible', true);
-          teclado.setAttribute('visible', true);
-          textoDigitado.setAttribute('value', '');
-        }, 3000);
+        textoDigitado.setAttribute('value', '');
       });
 
       teclado.appendChild(entrar);
@@ -188,40 +188,50 @@
     <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="color: #ccc"></a-plane>
 
     <!-- LOUSA -->
-    <a-image id="lousa" src="lousaembranco2.png" position="0 2.5 -4.95" width="5.6" height="3.1" interacao-lousa></a-image>
+    <a-image
+      id="lousa"
+      src="lousaembranco2.png"
+      position="0 2.5 -4.95"
+      width="5.6"
+      height="3.1"
+      interacao-lousa
+    ></a-image>
 
-    <!-- BARRA INVISÍVEL (4m da lousa) -->
-    <a-entity geometry="primitive: box; width: 10; height: 5; depth: 0.1"
-              position="0 2 -0.95"
+    <a-image id="imagem-ninho" src="#img-ninho" position="0 3 -4.9" width="1" height="0.5" visible="false"></a-image>
+
+    <a-text
+      id="texto-digitado"
+      value=""
+      position="0 2.5 -4.9"
+      color="#000"
+      align="center"
+      width="3"
+      font="mozillavr"
+      visible="false"
+    ></a-text>
+
+    <a-image id="estrela" src="#img-estrela" position="0 4 -4.9" width="1" height="1" visible="false"></a-image>
+    <a-image id="estrela-triste" src="#img-estrela-triste" position="0 4 -4.9" width="1" height="1" visible="false"></a-image>
+
+    <a-entity id="teclado" visible="false"></a-entity>
+
+    <!-- BARREIRA INVISÍVEL -->
+    <a-entity geometry="primitive: box; width: 8; height: 3; depth: 0.1"
+              position="0 1.5 -4"
               material="opacity: 0; transparent: true"
               static-body></a-entity>
-
-    <!-- ELEMENTOS DA LOUSA -->
-    <a-image id="imagem-ninho" src="#img-ninho" position="0 3 -4.9" width="1" height="0.5" visible="false"></a-image>
-    <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" font="mozillavr" visible="false"></a-text>
-    <a-image id="estrela-feliz" src="#img-estrela" position="0 3 -4.9" width="1" height="1" visible="false"></a-image>
-    <a-image id="estrela-triste" src="#img-estrela-triste" position="0 3 -4.9" width="1" height="1" visible="false"></a-image>
-
-    <!-- TECLADO -->
-    <a-entity id="teclado" visible="false"></a-entity>
 
     <!-- PEGADAS -->
     <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.01 4" gaze-teleport-jogo></a-image>
 
-    <!-- CÂMERA E CONTROLES -->
+    <!-- CÂMERA -->
     <a-entity id="cameraRig" position="0 0.5 0">
       <a-camera look-controls>
         <a-cursor fuse="true" fuse-timeout="2000" color="red"
           geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-          material="color: red; shader: flat"
-          position="0 0 -1">
+          material="color: red; shader: flat" position="0 0 -1">
         </a-cursor>
       </a-camera>
-    </a-entity>
-
-    <a-entity id="teleportRig" position="0 0 0">
-      <a-entity laser-controls="hand: right"></a-entity>
-      <a-entity teleport-controls="cameraRig: #cameraRig; button: trigger; collisionEntities: .piso;"></a-entity>
     </a-entity>
   </a-scene>
 </body>
