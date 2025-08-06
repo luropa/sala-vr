@@ -43,7 +43,6 @@
         const estrelaTriste = document.querySelector('#estrela-triste');
 
         this.el.addEventListener('mouseenter', () => {
-          console.log("Cursor entrou na lousa!");
           this.timeout = setTimeout(() => {
             texto.setAttribute('visible', true);
             imagem.setAttribute('visible', true);
@@ -60,7 +59,7 @@
       }
     });
 
-    // Função para criar teclado
+    // FUNÇÃO PARA CRIAR TECLADO
     function criarTeclado() {
       const teclado = document.querySelector('#teclado');
       const textoDigitado = document.querySelector('#texto-digitado');
@@ -80,20 +79,20 @@
         plano.setAttribute('width', 0.35);
         plano.setAttribute('height', 0.35);
         plano.setAttribute('color', "#fff");
-        plano.setAttribute('opacity', 0.1); // Teclas transparentes
+        plano.setAttribute('opacity', 0.1);
         plano.setAttribute('position', `${x} ${y} -4.9`);
 
         const letraText = document.createElement('a-text');
         letraText.setAttribute('value', letra);
         letraText.setAttribute('align', 'center');
         letraText.setAttribute('color', '#000');
-        letraText.setAttribute('width', '2');
+        letraText.setAttribute('width', '1.8');
         letraText.setAttribute('position', '0 0 0.01');
 
         plano.appendChild(letraText);
 
         plano.addEventListener('click', () => {
-          let textoAtual = textoDigitado.getAttribute('value');
+          let textoAtual = textoDigitado.getAttribute('value') || '';
           if (textoAtual.length < 10) {
             textoDigitado.setAttribute('value', textoAtual + letra);
           }
@@ -106,19 +105,20 @@
       const btnApagar = document.createElement('a-plane');
       btnApagar.setAttribute('width', 1.2);
       btnApagar.setAttribute('height', 0.35);
-      btnApagar.setAttribute('color', '#f88');
+      btnApagar.setAttribute('color', '#fff');
+      btnApagar.setAttribute('opacity', 0.1);
       btnApagar.setAttribute('position', `-1 1.2 -4.9`);
 
       const txtApagar = document.createElement('a-text');
       txtApagar.setAttribute('value', 'Apagar');
       txtApagar.setAttribute('align', 'center');
       txtApagar.setAttribute('color', '#000');
-      txtApagar.setAttribute('width', '3');
+      txtApagar.setAttribute('width', '2.5');
       txtApagar.setAttribute('position', '0 0 0.01');
 
       btnApagar.appendChild(txtApagar);
       btnApagar.addEventListener('click', () => {
-        let textoAtual = textoDigitado.getAttribute('value');
+        let textoAtual = textoDigitado.getAttribute('value') || '';
         textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
       });
       teclado.appendChild(btnApagar);
@@ -127,14 +127,15 @@
       const btnEntrar = document.createElement('a-plane');
       btnEntrar.setAttribute('width', 1.2);
       btnEntrar.setAttribute('height', 0.35);
-      btnEntrar.setAttribute('color', '#8f8');
+      btnEntrar.setAttribute('color', '#fff');
+      btnEntrar.setAttribute('opacity', 0.1);
       btnEntrar.setAttribute('position', `1 1.2 -4.9`);
 
       const txtEntrar = document.createElement('a-text');
       txtEntrar.setAttribute('value', 'Entrar');
       txtEntrar.setAttribute('align', 'center');
       txtEntrar.setAttribute('color', '#000');
-      txtEntrar.setAttribute('width', '3');
+      txtEntrar.setAttribute('width', '2.5');
       txtEntrar.setAttribute('position', '0 0 0.01');
 
       btnEntrar.appendChild(txtEntrar);
