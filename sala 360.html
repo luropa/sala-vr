@@ -5,7 +5,7 @@
   <title>Sala com Teclado e Pegadas</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-  <!-- COMPONENTE: TELEPORTE NAS PEGADAS -->
+  <!-- COMPONENTE: GAZE NAS PEGADAS -->
   <script>
     AFRAME.registerComponent('gaze-teleport-jogo', {
       init: function () {
@@ -55,19 +55,14 @@
       }
     });
 
-    // Função para criar teclado
     function criarTeclado() {
       const teclado = document.querySelector('#teclado');
       const textoDigitado = document.querySelector('#texto-digitado');
-      const imagemNinho = document.querySelector('#imagem-ninho');
-      const estrelaFeliz = document.querySelector('#estrela-feliz');
-      const estrelaTriste = document.querySelector('#estrela-triste');
-
       const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
-      const espacamentoX = 0.4;
-      const espacamentoY = 0.4;
+      const espacamentoX = 0.3;
+      const espacamentoY = 0.3;
       const startX = -6 * espacamentoX;
-      const startY = 1.8;
+      const startY = 1.9;
 
       letras.forEach((letra, index) => {
         const linha = index < 13 ? 0 : 1;
@@ -81,15 +76,14 @@
         plano.setAttribute('color', "#fff");
         plano.setAttribute('opacity', 0.3);
         plano.setAttribute('position', `${x} ${y} -4.9`);
-        plano.setAttribute('class', 'tecla');
 
         const letraText = document.createElement('a-text');
         letraText.setAttribute('value', letra);
         letraText.setAttribute('align', 'center');
         letraText.setAttribute('color', '#000');
         letraText.setAttribute('width', '2');
-        letraText.setAttribute('font', 'mozillavr');
         letraText.setAttribute('position', '0 0 0.01');
+        letraText.setAttribute('font', 'mozillavr');
 
         plano.appendChild(letraText);
 
@@ -104,92 +98,77 @@
       });
 
       // Botão Apagar
-      const btnApagar = document.createElement('a-plane');
-      btnApagar.setAttribute('position', '1.5 0.9 -4.9');
-      btnApagar.setAttribute('width', 0.8);
-      btnApagar.setAttribute('height', 0.4);
-      btnApagar.setAttribute('color', '#fff');
-      btnApagar.setAttribute('opacity', 0.3);
+      const apagar = document.createElement('a-plane');
+      apagar.setAttribute('width', 1);
+      apagar.setAttribute('height', 0.4);
+      apagar.setAttribute('color', '#fff');
+      apagar.setAttribute('opacity', 0.3);
+      apagar.setAttribute('position', '0.5 1.2 -4.9');
 
-      const txtApagar = document.createElement('a-text');
-      txtApagar.setAttribute('value', 'Apagar');
-      txtApagar.setAttribute('align', 'center');
-      txtApagar.setAttribute('color', '#000');
-      txtApagar.setAttribute('font', 'mozillavr');
-      txtApagar.setAttribute('position', '0 0 0.01');
+      const textoApagar = document.createElement('a-text');
+      textoApagar.setAttribute('value', 'Apagar');
+      textoApagar.setAttribute('align', 'center');
+      textoApagar.setAttribute('color', '#000');
+      textoApagar.setAttribute('width', '2');
+      textoApagar.setAttribute('position', '0 0 0.01');
+      textoApagar.setAttribute('font', 'mozillavr');
+      apagar.appendChild(textoApagar);
 
-      btnApagar.appendChild(txtApagar);
-      btnApagar.addEventListener('click', () => {
+      apagar.addEventListener('click', () => {
         let textoAtual = textoDigitado.getAttribute('value');
         textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
       });
-      teclado.appendChild(btnApagar);
+      teclado.appendChild(apagar);
 
       // Botão Entrar
-      const btnEntrar = document.createElement('a-plane');
-      btnEntrar.setAttribute('position', '2.5 0.9 -4.9');
-      btnEntrar.setAttribute('width', 0.8);
-      btnEntrar.setAttribute('height', 0.4);
-      btnEntrar.setAttribute('color', '#fff');
-      btnEntrar.setAttribute('opacity', 0.3);
+      const entrar = document.createElement('a-plane');
+      entrar.setAttribute('width', 1);
+      entrar.setAttribute('height', 0.4);
+      entrar.setAttribute('color', '#fff');
+      entrar.setAttribute('opacity', 0.3);
+      entrar.setAttribute('position', '-0.5 1.2 -4.9');
 
-      const txtEntrar = document.createElement('a-text');
-      txtEntrar.setAttribute('value', 'Entrar');
-      txtEntrar.setAttribute('align', 'center');
-      txtEntrar.setAttribute('color', '#000');
-      txtEntrar.setAttribute('font', 'mozillavr');
-      txtEntrar.setAttribute('position', '0 0 0.01');
+      const textoEntrar = document.createElement('a-text');
+      textoEntrar.setAttribute('value', 'Entrar');
+      textoEntrar.setAttribute('align', 'center');
+      textoEntrar.setAttribute('color', '#000');
+      textoEntrar.setAttribute('width', '2');
+      textoEntrar.setAttribute('position', '0 0 0.01');
+      textoEntrar.setAttribute('font', 'mozillavr');
+      entrar.appendChild(textoEntrar);
 
-      btnEntrar.appendChild(txtEntrar);
-      btnEntrar.addEventListener('click', () => {
-        const palavra = textoDigitado.getAttribute('value').toLowerCase();
-        teclado.setAttribute('visible', false);
-        textoDigitado.setAttribute('visible', false);
-        imagemNinho.setAttribute('visible', false);
-
-        if (palavra === 'ninho') {
+      entrar.addEventListener('click', () => {
+        const texto = textoDigitado.getAttribute('value').toLowerCase();
+        const estrelaFeliz = document.querySelector('#estrela-feliz');
+        const estrelaTriste = document.querySelector('#estrela-triste');
+        const imagemNinho = document.querySelector('#imagem-ninho');
+        
+        if (texto === 'ninho') {
           estrelaFeliz.setAttribute('visible', true);
-          setTimeout(() => estrelaFeliz.setAttribute('visible', false), 3000);
         } else {
           estrelaTriste.setAttribute('visible', true);
-          setTimeout(() => {
-            estrelaTriste.setAttribute('visible', false);
-            teclado.setAttribute('visible', true);
-            textoDigitado.setAttribute('visible', true);
-            imagemNinho.setAttribute('visible', true);
-          }, 3000);
         }
 
-        textoDigitado.setAttribute('value', '');
+        // Esconde o teclado e imagem temporariamente
+        teclado.setAttribute('visible', false);
+        imagemNinho.setAttribute('visible', false);
+
+        setTimeout(() => {
+          estrelaFeliz.setAttribute('visible', false);
+          estrelaTriste.setAttribute('visible', false);
+          imagemNinho.setAttribute('visible', true);
+          teclado.setAttribute('visible', true);
+          textoDigitado.setAttribute('value', '');
+        }, 3000);
       });
 
-      teclado.appendChild(btnEntrar);
+      teclado.appendChild(entrar);
     }
-  </script>
-
-  <!-- BLOQUEAR CÂMERA A NO MÁXIMO 4M DA LOUSA -->
-  <script>
-    AFRAME.registerComponent('barreira-lousa', {
-      tick: function () {
-        const cameraRig = document.querySelector('#cameraRig');
-        const pos = cameraRig.object3D.position;
-        const distanciaZ = Math.abs(pos.z + 4.9);
-        if (distanciaZ < 0.1) return; // tolerância
-
-        if (distanciaZ < 0.01) return;
-        if (pos.z < -4.9) {
-          pos.z = -4.9;
-        } else if (pos.z > -0.9) {
-          pos.z = -0.9;
-        }
-      }
-    });
   </script>
 </head>
 
 <body>
   <a-scene>
-
     <a-assets>
       <img id="img-ninho" src="palavraninho.png" />
       <img id="img-estrela" src="estrelacontente.png" />
@@ -197,7 +176,7 @@
       <img id="jogo" src="jogo-da-velha-feltro2.png" />
     </a-assets>
 
-    <!-- LUZ E FUNDO -->
+    <!-- ILUMINAÇÃO E FUNDO -->
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
     <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
     <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
@@ -209,30 +188,19 @@
     <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="color: #ccc"></a-plane>
 
     <!-- LOUSA -->
-    <a-image
-      id="lousa"
-      src="lousaembranco2.png"
-      position="0 2.5 -4.95"
-      width="5.6"
-      height="3.1"
-      interacao-lousa
-    ></a-image>
+    <a-image id="lousa" src="lousaembranco2.png" position="0 2.5 -4.95" width="5.6" height="3.1" interacao-lousa></a-image>
 
-    <!-- IMAGENS E TEXTOS -->
+    <!-- BARRA INVISÍVEL (4m da lousa) -->
+    <a-entity geometry="primitive: box; width: 10; height: 5; depth: 0.1"
+              position="0 2 -0.95"
+              material="opacity: 0; transparent: true"
+              static-body></a-entity>
+
+    <!-- ELEMENTOS DA LOUSA -->
     <a-image id="imagem-ninho" src="#img-ninho" position="0 3 -4.9" width="1" height="0.5" visible="false"></a-image>
-    <a-image id="estrela-feliz" src="#img-estrela" position="0 2.5 -4.9" width="1" height="1" visible="false"></a-image>
-    <a-image id="estrela-triste" src="#img-estrela-triste" position="0 2.5 -4.9" width="1" height="1" visible="false"></a-image>
-
-    <a-text
-      id="texto-digitado"
-      value=""
-      position="0 2.5 -4.9"
-      color="#000"
-      align="center"
-      width="3"
-      font="mozillavr"
-      visible="false"
-    ></a-text>
+    <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" font="mozillavr" visible="false"></a-text>
+    <a-image id="estrela-feliz" src="#img-estrela" position="0 3 -4.9" width="1" height="1" visible="false"></a-image>
+    <a-image id="estrela-triste" src="#img-estrela-triste" position="0 3 -4.9" width="1" height="1" visible="false"></a-image>
 
     <!-- TECLADO -->
     <a-entity id="teclado" visible="false"></a-entity>
@@ -240,17 +208,14 @@
     <!-- PEGADAS -->
     <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.01 4" gaze-teleport-jogo></a-image>
 
-    <!-- CÂMERA E CONTROLE -->
-    <a-entity id="cameraRig" position="0 0.5 0" barreira-lousa>
+    <!-- CÂMERA E CONTROLES -->
+    <a-entity id="cameraRig" position="0 0.5 0">
       <a-camera look-controls>
-        <a-cursor
-          fuse="true"
-          fuse-timeout="2000"
-          color="red"
+        <a-cursor fuse="true" fuse-timeout="2000" color="red"
           geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
           material="color: red; shader: flat"
-          position="0 0 -1"
-        ></a-cursor>
+          position="0 0 -1">
+        </a-cursor>
       </a-camera>
     </a-entity>
 
