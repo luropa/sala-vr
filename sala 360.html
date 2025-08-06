@@ -32,13 +32,15 @@
     });
   </script>
 
-  <!-- COMPONENTE: INTERAÇÃO COM A LOUSA PARA EXIBIR TECLADO -->
+  <!-- COMPONENTE: INTERAÇÃO COM A LOUSA -->
   <script>
     AFRAME.registerComponent('interacao-lousa', {
       init: function () {
         const teclado = document.querySelector('#teclado');
         const texto = document.querySelector('#texto-digitado');
         const imagem = document.querySelector('#imagem-ninho');
+        const estrelaFeliz = document.querySelector('#estrela-feliz');
+        const estrelaTriste = document.querySelector('#estrela-triste');
 
         this.el.addEventListener('mouseenter', () => {
           console.log("Cursor entrou na lousa!");
@@ -46,6 +48,8 @@
             texto.setAttribute('visible', true);
             imagem.setAttribute('visible', true);
             teclado.setAttribute('visible', true);
+            estrelaFeliz.setAttribute('visible', false);
+            estrelaTriste.setAttribute('visible', false);
             if (teclado.children.length === 0) criarTeclado();
           }, 2000);
         });
@@ -76,7 +80,7 @@
         plano.setAttribute('width', 0.35);
         plano.setAttribute('height', 0.35);
         plano.setAttribute('color', "#fff");
-        plano.setAttribute('opacity', 0.3);
+        plano.setAttribute('opacity', 0.1); // Teclas transparentes
         plano.setAttribute('position', `${x} ${y} -4.9`);
 
         const letraText = document.createElement('a-text');
@@ -97,6 +101,68 @@
 
         teclado.appendChild(plano);
       });
+
+      // Botão Apagar
+      const btnApagar = document.createElement('a-plane');
+      btnApagar.setAttribute('width', 1.2);
+      btnApagar.setAttribute('height', 0.35);
+      btnApagar.setAttribute('color', '#f88');
+      btnApagar.setAttribute('position', `-1 1.2 -4.9`);
+
+      const txtApagar = document.createElement('a-text');
+      txtApagar.setAttribute('value', 'Apagar');
+      txtApagar.setAttribute('align', 'center');
+      txtApagar.setAttribute('color', '#000');
+      txtApagar.setAttribute('width', '3');
+      txtApagar.setAttribute('position', '0 0 0.01');
+
+      btnApagar.appendChild(txtApagar);
+      btnApagar.addEventListener('click', () => {
+        let textoAtual = textoDigitado.getAttribute('value');
+        textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
+      });
+      teclado.appendChild(btnApagar);
+
+      // Botão Entrar
+      const btnEntrar = document.createElement('a-plane');
+      btnEntrar.setAttribute('width', 1.2);
+      btnEntrar.setAttribute('height', 0.35);
+      btnEntrar.setAttribute('color', '#8f8');
+      btnEntrar.setAttribute('position', `1 1.2 -4.9`);
+
+      const txtEntrar = document.createElement('a-text');
+      txtEntrar.setAttribute('value', 'Entrar');
+      txtEntrar.setAttribute('align', 'center');
+      txtEntrar.setAttribute('color', '#000');
+      txtEntrar.setAttribute('width', '3');
+      txtEntrar.setAttribute('position', '0 0 0.01');
+
+      btnEntrar.appendChild(txtEntrar);
+      btnEntrar.addEventListener('click', () => {
+        const palavra = textoDigitado.getAttribute('value').toUpperCase();
+        const imagem = document.querySelector('#imagem-ninho');
+        const teclado = document.querySelector('#teclado');
+        const estrelaFeliz = document.querySelector('#estrela-feliz');
+        const estrelaTriste = document.querySelector('#estrela-triste');
+
+        teclado.setAttribute('visible', false);
+        imagem.setAttribute('visible', false);
+
+        if (palavra === "NINHO") {
+          estrelaFeliz.setAttribute('visible', true);
+        } else {
+          estrelaTriste.setAttribute('visible', true);
+        }
+
+        setTimeout(() => {
+          textoDigitado.setAttribute('value', '');
+          teclado.setAttribute('visible', true);
+          imagem.setAttribute('visible', true);
+          estrelaFeliz.setAttribute('visible', false);
+          estrelaTriste.setAttribute('visible', false);
+        }, 3000);
+      });
+      teclado.appendChild(btnEntrar);
     }
   </script>
 </head>
@@ -115,13 +181,23 @@
     <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
     <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
 
-    <!-- PAREDES E ELEMENTOS -->
+    <!-- PAREDES -->
     <a-plane width="10" height="5" position="0 2.5 -5" material="color: #ccc"></a-plane>
     <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="color: #ccc"></a-plane>
     <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="color: #ccc"></a-plane>
     <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="color: #ccc"></a-plane>
 
-    <!-- LOUSA COM COMPONENTE -->
+    <!-- BARREIRA INVISÍVEL A 4M DA LOUSA -->
+    <a-plane
+      position="0 2.5 -0.95"
+      width="10"
+      height="5"
+      rotation="0 0 0"
+      visible="false"
+      class="piso"
+    ></a-plane>
+
+    <!-- LOUSA -->
     <a-image
       id="lousa"
       src="lousaembranco2.png"
@@ -133,14 +209,9 @@
       interacao-lousa
     ></a-image>
 
-    <a-image
-      id="imagem-ninho"
-      src="#img-ninho"
-      position="0 3 -4.9"
-      width="1"
-      height="0.5"
-      visible="false"
-    ></a-image>
+    <a-image id="imagem-ninho" src="#img-ninho" position="0 3 -4.9" width="1" height="0.5" visible="false"></a-image>
+    <a-image id="estrela-feliz" src="#img-estrela" position="0 3 -4.9" width="1" height="1" visible="false"></a-image>
+    <a-image id="estrela-triste" src="#img-estrela-triste" position="0 3 -4.9" width="1" height="1" visible="false"></a-image>
 
     <a-text
       id="texto-digitado"
@@ -171,6 +242,7 @@
       </a-camera>
     </a-entity>
 
+    <!-- TELEPORTE -->
     <a-entity id="teleportRig" position="0 0 0">
       <a-entity laser-controls="hand: right"></a-entity>
       <a-entity teleport-controls="cameraRig: #cameraRig; button: trigger; collisionEntities: .piso;"></a-entity>
