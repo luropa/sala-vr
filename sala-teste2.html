@@ -5,6 +5,7 @@
   <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script>
+    // Componente para teleporte por gaze nas pegadas e jogo da velha
     AFRAME.registerComponent('gaze-teleport-jogo', {
       init: function () {
         this.el.addEventListener('mouseenter', () => {
@@ -14,6 +15,7 @@
             if (now - this.startTime >= 2000) {
               clearInterval(this.checkGaze);
               const cameraRig = document.querySelector('#cameraRig');
+              // Teletransporta para frente do jogo da velha
               cameraRig.setAttribute('animation__moveToJogo', {
                 property: 'position',
                 to: '2.8 0.5 3.5',
@@ -31,7 +33,7 @@
   </script>
 </head>
 <body>
-  <a-scene>
+  <a-scene background="color: #a0c8f0"> <!-- fundo azul claro para evitar rosa -->
     <a-assets>
       <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
       <img id="img-ninho" src="palavraninho.png" />
@@ -42,88 +44,65 @@
 
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
 
+    <!-- Piso e teto -->
     <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
     <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
 
+    <!-- Sol -->
     <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
 
+    <!-- Paredes -->
     <a-plane width="10" height="5" position="0 2.5 -5" rotation="0 0 0" material="src: paredeerodape2.png; side: front;"></a-plane>
     <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png; side: front;"></a-plane>
     <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
     <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
 
-    <a-image src="porta.png" width="2" height="4" position="0 2 4.97" rotation="0 180 0"></a-image>
+    <!-- Porta -->
+    <a-image src="porta.png" width="2" height="4" position="0 2 4.99" rotation="0 180 0"></a-image>
 
-    <a-image
-      id="lousa"
-      interacao-lousa
-      src="lousaembranco2.png"
-      width="5.6"
-      height="3.1"
-      position="0 2.5 -4.95"
-      gaze-activate-move
-    ></a-image>
+    <!-- Lousa -->
+    <a-image id="lousa" interacao-lousa src="lousaembranco2.png" width="5.6" height="3.1" position="0 2.5 -4.95" gaze-activate-move></a-image>
 
-    <a-image
-      id="imagem-ninho"
-      src="#img-ninho"
-      width="1"
-      height="0.5"
-      position="0 3 -4.9"
-      visible="false"
-    ></a-image>
+    <!-- Palavra e texto digitado -->
+    <a-image id="imagem-ninho" src="#img-ninho" width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
+    <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" visible="false"></a-text>
 
-    <a-text
-      id="texto-digitado"
-      value=""
-      position="0 2.5 -4.9"
-      color="#000"
-      align="center"
-      width="3"
-      visible="false"
-    ></a-text>
-
+    <!-- Teclado -->
     <a-entity id="teclado" visible="false"></a-entity>
 
+    <!-- Itens de chão e parede -->
     <a-image src="tapete.png" width="5" height="7" rotation="-90 0 0" position="-3 0.01 1"></a-image>
     <a-image src="ponteirotwister.png" width="0.9" height="0.9" rotation="-90 0 0" position="-1.2 0.02 2"></a-image>
     <a-image src="tatame.png" width="4" height="4" rotation="-90 0 0" position="2.7 0.01 1"></a-image>
     <a-image src="quebra-cabeca.png" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
     <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
 
-    <!-- Jogo da velha na mesma parede da porta, à direita da porta -->
-    <a-image
-      id="jogoDaVelha"
-      src="#jogo"
-      width="1.5"
-      height="1.5"
-      position="2.8 2 4.95"
-      rotation="0 180 0"porta
-    ></a-image> <!-- Removido gaze-teleport-jogo -->
+    <!-- Jogo da velha -->
+    <a-image id="jogoDaVelha" src="#jogo" width="1.5" height="1.5" position="2.8 2 4.95" rotation="0 180 0" gaze-teleport-jogo></a-image>
 
+    <!-- Detalhes -->
     <a-image src="interruptor-branco.png" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
     <a-image src="relogio2.png" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
     <a-image src="nuvem2.png" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
     <a-image src="nuvem2.png" width="2" height="1.7" position="-3.5 3.5 -4.95"></a-image>
 
-    <a-entity
-      id="cadeira"
-      gltf-model="#modeloCadeira"
-      position="3 0 -3"
-      scale="0.8 0.8 0.8"
-      static-body
-    ></a-entity>
+    <!-- Cadeira -->
+    <a-entity id="cadeira" gltf-model="#modeloCadeira" position="3 0 -3" scale="0.8 0.8 0.8" static-body></a-entity>
 
-    <!-- Pegadas (agora ativam teleporte ao olhar) -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.01 4" gaze-teleport-jogo></a-image> <!-- entre tatame e jogo -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="0 0.01 4"></a-image> <!-- para porta -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 0 0" position="0 0.01 -1.5"></a-image> <!-- para lousa -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 -90 0" position="4.2 0.01 -2"></a-image> <!-- oposta janela -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="-3 0.05 4"></a-image> <!-- ao lado esquerdo da porta -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 90 0" position="0 0.01 0.5"></a-image> <!-- para janela -->
+    <!-- Pegadas com gaze -->
+    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.01 4" gaze-teleport-jogo></a-image>
+    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="0 0.01 4"></a-image>
+    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 0 0" position="0 0.01 -1.5"></a-image>
+    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 -90 0" position="4.2 0.01 -2"></a-image>
+    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="-3 0.05 4"></a-image>
+    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 90 0" position="0 0.01 0.5"></a-image>
 
-    <a-entity id="cameraRig" position="0 0.5 0">
-      <a-camera look-controls wasd-controls-enabled="true">
+    <!-- Usuário fixo a 4.5 metros da lousa, pode girar 360 graus -->
+    <a-entity id="cameraRig" position="0 0.5 -1.95">
+      <a-camera 
+        look-controls="enabled: true; pointerLockEnabled: true"
+        wasd-controls-enabled="false"
+      >
         <a-cursor
           fuse="true"
           fuse-timeout="2000"
@@ -134,13 +113,165 @@
         ></a-cursor>
       </a-camera>
     </a-entity>
-
-    <a-entity id="teleportRig" position="0 0 0">
-      <a-entity laser-controls="hand: right"></a-entity>
-      <a-entity teleport-controls="cameraRig: #cameraRig; button: trigger; collisionEntities: .piso;"></a-entity>
-    </a-entity>
   </a-scene>
 
-  <!-- O restante do script (interação com lousa, teclado, etc.) continua como no seu código anterior -->
+  <script>
+    // Código para interações da lousa e teclado (mesmo que antes)
+    const lousa = document.querySelector('#lousa');
+    const imagem = document.querySelector('#imagem-ninho');
+    const teclado = document.querySelector('#teclado');
+    const textoDigitado = document.querySelector('#texto-digitado');
+
+    const tamanhoOriginal = { width: 1, height: 0.5 };
+    let tecladoCriado = false;
+    let finalizou = false;  // flag para bloquear reaparecimento
+
+    AFRAME.registerComponent('interacao-lousa', {
+      init: function () {
+        this.el.addEventListener('mouseenter', () => {
+          if(finalizou) return;
+
+          this.timeout = setTimeout(() => {
+            imagem.setAttribute('visible', true);
+            textoDigitado.setAttribute('visible', true);
+            textoDigitado.setAttribute('value', '');
+            imagem.setAttribute('src', '#img-ninho');
+            imagem.setAttribute('width', tamanhoOriginal.width.toString());
+            imagem.setAttribute('height', tamanhoOriginal.height.toString());
+            imagem.setAttribute('position', '0 3 -4.9');
+
+            if (!tecladoCriado) {
+              criarTeclado();
+              tecladoCriado = true;
+            }
+
+            teclado.setAttribute('visible', true);
+          }, 2000);
+        });
+
+        this.el.addEventListener('mouseleave', () => {
+          clearTimeout(this.timeout);
+        });
+      }
+    });
+
+    function criarTeclado() {
+      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      const espacamentoX = 0.3;
+      const espacamentoY = 0.3;
+      const startX = -6 * espacamentoX;
+      const startY = 1.9;
+      const corTecla = '#ffffff';
+      const opacidadeTecla = 0.2;
+
+      letras.forEach((letra, index) => {
+        const linha = index < 13 ? 0 : 1;
+        const col = index % 13;
+        const x = startX + col * espacamentoX;
+        const y = startY - linha * espacamentoY;
+
+        const plano = document.createElement('a-plane');
+        plano.setAttribute('width', 0.35);
+        plano.setAttribute('height', 0.35);
+        plano.setAttribute('color', corTecla);
+        plano.setAttribute('opacity', opacidadeTecla);
+        plano.setAttribute('position', `${x} ${y} -4.9`);
+
+        const letraText = document.createElement('a-text');
+        letraText.setAttribute('value', letra);
+        letraText.setAttribute('color', '#000');
+        letraText.setAttribute('align', 'center');
+        letraText.setAttribute('width', '2');
+        letraText.setAttribute('position', '0 0 0.02');
+
+        plano.appendChild(letraText);
+
+        plano.addEventListener('click', () => {
+          if(finalizou) return;
+
+          let textoAtual = textoDigitado.getAttribute('value');
+          if (!textoAtual.endsWith(letra)) {
+            textoDigitado.setAttribute('value', textoAtual + letra);
+          }
+        });
+
+        teclado.appendChild(plano);
+      });
+
+      criarBotaoExtra(
+        'Apagar',
+        -1,
+        startY - 2 * espacamentoY,
+        () => {
+          if(finalizou) return;
+
+          let textoAtual = textoDigitado.getAttribute('value');
+          textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
+        },
+        corTecla,
+        opacidadeTecla
+      );
+
+      criarBotaoExtra(
+        'Entrar',
+        1,
+        startY - 2 * espacamentoY,
+        () => {
+          if(finalizou) return;
+
+          const texto = textoDigitado.getAttribute('value').trim().toUpperCase();
+
+          if (texto === 'NINHO') {
+            imagem.setAttribute('src', '#img-estrela');
+            imagem.setAttribute('width', '0.8');
+            imagem.setAttribute('height', '1.2');
+            imagem.setAttribute('position', '0 3 -4.8');
+            textoDigitado.setAttribute('visible', false);
+            teclado.setAttribute('visible', false);
+            finalizou = true;
+          } else {
+            imagem.setAttribute('src', '#img-estrela-triste');
+            imagem.setAttribute('material', 'transparent: true');
+            imagem.setAttribute('width', '1.7');
+            imagem.setAttribute('height', '1.5');
+            imagem.setAttribute('position', '0 3 -4.8');
+            textoDigitado.setAttribute('visible', false);
+
+            setTimeout(() => {
+              imagem.setAttribute('src', '#img-ninho');
+              imagem.setAttribute('width', tamanhoOriginal.width.toString());
+              imagem.setAttribute('height', tamanhoOriginal.height.toString());
+              imagem.setAttribute('position', '0 3 -4.9');
+              textoDigitado.setAttribute('value', '');
+              textoDigitado.setAttribute('visible', true);
+              teclado.setAttribute('visible', true);
+            }, 3000);
+          }
+        },
+        corTecla,
+        opacidadeTecla
+      );
+    }
+
+    function criarBotaoExtra(texto, x, y, callback, cor, opacidade) {
+      const plano = document.createElement('a-plane');
+      plano.setAttribute('width', 1);
+      plano.setAttribute('height', 0.3);
+      plano.setAttribute('color', cor);
+      plano.setAttribute('opacity', opacidade);
+      plano.setAttribute('position', `${x} ${y} -4.9`);
+
+      const textoEntity = document.createElement('a-text');
+      textoEntity.setAttribute('value', texto);
+      textoEntity.setAttribute('align', 'center');
+      textoEntity.setAttribute('color', '#000');
+      textoEntity.setAttribute('width', '2');
+      textoEntity.setAttribute('position', '0 0 0.02');
+
+      plano.appendChild(textoEntity);
+      plano.addEventListener('click', callback);
+      teclado.appendChild(plano);
+    }
+  </script>
 </body>
 </html>
