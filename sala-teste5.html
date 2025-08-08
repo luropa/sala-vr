@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head> 
   <meta charset="utf-8" />
-  <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze para VR</title>
+  <title>Sala de Estudo com Teclado Virtual e Movimento por Gaze para VR Box</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
 <body>
@@ -14,105 +14,118 @@
       <img id="img-estrela" src="estrelacontente.png" />
       <img id="img-estrela-triste" src="estrelatriste.png" />
       <img id="jogo" src="jogo-da-velha-feltro2.png" />
+      <img id="sol" src="sol.png" />
+      <img id="porta" src="porta.png" />
+      <img id="tapete" src="tapete.png" />
+      <img id="ponteiro" src="ponteirotwister.png" />
+      <img id="tatame" src="tatame.png" />
+      <img id="quebra" src="quebra-cabeca.png" />
+      <img id="janela" src="janela2.png" />
+      <img id="interruptor" src="interruptor-branco.png" />
+      <img id="relogio" src="relogio2.png" />
+      <img id="nuvem" src="nuvem2.png" />
+      <img id="pegadas" src="pegadas.png" />
     </a-assets>
 
     <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
 
     <!-- Piso e teto -->
-    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0"></a-plane>
+    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
     <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
 
     <!-- Paredes -->
-    <a-plane width="10" height="5" position="0 2.5 -5" material="src: paredeerodape2.png;"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png;"></a-plane>
-    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png;"></a-plane>
-    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png;"></a-plane>
+    <a-plane width="10" height="5" position="0 2.5 -5" rotation="0 0 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+
+    <!-- Porta -->
+    <a-image src="#porta" width="2" height="4" position="0 2 4.99" rotation="0 180 0"></a-image>
+
+    <!-- Sol -->
+    <a-image src="#sol" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
 
     <!-- Lousa -->
     <a-image id="lousa" interacao-lousa src="lousaembranco2.png" width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
 
-    <!-- Palavra e texto -->
+    <!-- Palavra e texto digitado -->
     <a-image id="imagem-ninho" src="#img-ninho" width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
     <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" visible="false"></a-text>
 
     <!-- Teclado -->
     <a-entity id="teclado" visible="false"></a-entity>
 
-    <!-- Pegadas visíveis -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.01 4"></a-image>
+    <!-- Itens de chão e parede -->
+    <a-image src="#tapete" width="5" height="7" rotation="-90 0 0" position="-3 0.01 1"></a-image>
+    <a-image src="#ponteiro" width="0.9" height="0.9" rotation="-90 0 0" position="-1.2 0.02 2"></a-image>
+    <a-image src="#tatame" width="4" height="4" rotation="-90 0 0" position="2.7 0.01 1"></a-image>
+    <a-image src="#quebra" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
+    <a-image src="#janela" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
 
-    <!-- Plano invisível para gaze (área para teletransporte) -->
-    <a-plane id="teleportArea" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.02 4" material="opacity: 0; transparent: true"></a-plane>
+    <!-- Jogo da velha sem teletransporte -->
+    <a-image id="jogoDaVelha" src="#jogo" width="1.5" height="1.5" position="2.8 2 4.95" rotation="0 180 0"></a-image>
+
+    <!-- Detalhes -->
+    <a-image src="#interruptor" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
+    <a-image src="#relogio" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
+    <a-image src="#nuvem" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
+    <a-image src="#nuvem" width="2" height="1.7" position="-3.5 3.5 -4.95"></a-image>
+
+    <!-- Cadeira -->
+    <a-entity id="cadeira" gltf-model="#modeloCadeira" position="3 0 -3" scale="0.8 0.8 0.8" static-body></a-entity>
+
+    <!-- Pegadas com teletransporte ativado -->
+    <a-image src="#pegadas" width="0.8" height="0.8" rotation="-90 180 0" position="2.7 0.01 4"
+             teleport-target
+             material="opacity: 0; transparent: true"
+             geometry="primitive: plane; width: 0.8; height: 0.8"
+    ></a-image>
 
     <!-- Outras pegadas -->
-    <a-image src="pegadas.png" width="0.8" height="0.8" rotation="-90 90 0" position="0 0.01 0.5"></a-image>
+    <a-image src="#pegadas" width="0.8" height="0.8" rotation="-90 0 0" position="0 0.01 -1.5"></a-image>
+    <a-image src="#pegadas" width="0.8" height="0.8" rotation="-90 -90 0" position="4.2 0.01 -2"></a-image>
+    <a-image src="#pegadas" width="0.8" height="0.8" rotation="-90 180 0" position="-3 0.05 4"></a-image>
+    <a-image src="#pegadas" width="0.8" height="0.8" rotation="-90 90 0" position="0 0.01 0.5"></a-image>
 
-    <!-- Usuário -->
+    <!-- Usuário posicionado sobre pegadas voltadas para a janela -->
     <a-entity id="cameraRig" position="0 0.5 0.5" rotation="0 90 0">
       <a-camera look-controls wasd-controls-enabled="false">
-        <!-- Cursor não usado pois gaze será manual -->
+        <!-- Cursor para VR -->
+        <a-cursor fuse="true" fuse-timeout="2000" color="red"
+          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+          material="shader: flat"></a-cursor>
       </a-camera>
     </a-entity>
 
   </a-scene>
 
   <script>
-    AFRAME.registerComponent('gaze-teleport', {
-      schema: {
-        timeout: { type: 'number', default: 2000 } // tempo em ms para teletransporte
-      },
+    // Componente para teletransporte via gaze fixo em VR Box
+    AFRAME.registerComponent('teleport-target', {
       init: function () {
-        this.gazeTimer = null;
+        this.timeoutId = null;
         this.isGazing = false;
-        this.camera = document.querySelector('a-camera');
-        this.rig = document.querySelector('#cameraRig');
+        const rig = document.querySelector('#cameraRig');
 
-        // Raycaster para detectar o que a câmera está olhando
-        this.raycaster = new THREE.Raycaster();
+        this.el.addEventListener('mouseenter', () => {
+          this.isGazing = true;
+          this.timeoutId = setTimeout(() => {
+            rig.setAttribute('position', '0 0.5 -3'); // Frente da lousa
+            rig.setAttribute('rotation', '0 0 0');    // Olhando para a lousa
+          }, 2000); // 2 segundos
+        });
 
-        this.tick = AFRAME.utils.throttleTick(this.tick.bind(this), 100);
-      },
-      tick: function (time, delta) {
-        if (!this.camera) return;
-
-        // Posição e direção da câmera
-        const cameraObj = this.camera.object3D;
-        const origin = new THREE.Vector3();
-        const direction = new THREE.Vector3(0, 0, -1);
-        origin.setFromMatrixPosition(cameraObj.matrixWorld);
-        direction.applyQuaternion(cameraObj.quaternion);
-
-        // Raycast para o teleportArea
-        this.raycaster.set(origin, direction);
-        const teleportArea = document.querySelector('#teleportArea').object3D;
-        const intersects = this.raycaster.intersectObject(teleportArea, false);
-
-        if (intersects.length > 0) {
-          if (!this.isGazing) {
-            this.isGazing = true;
-            this.gazeTimer = setTimeout(() => {
-              // Teletransporte para frente da lousa
-              this.rig.setAttribute('position', '0 0.5 -3');
-              this.rig.setAttribute('rotation', '0 0 0');
-              console.log('Teletransporte realizado!');
-              this.isGazing = false;
-            }, this.data.timeout);
-          }
-        } else {
+        this.el.addEventListener('mouseleave', () => {
           this.isGazing = false;
-          if (this.gazeTimer) {
-            clearTimeout(this.gazeTimer);
-            this.gazeTimer = null;
+          if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
           }
-        }
+        });
       }
     });
 
-    // Ativa o componente no scene
-    document.querySelector('a-scene').setAttribute('gaze-teleport', '');
-
-    // Seu componente de interação com a lousa e teclado segue igual ao original:
-
+    // Seu componente interacao-lousa original
     const lousa = document.querySelector('#lousa');
     const imagem = document.querySelector('#imagem-ninho');
     const teclado = document.querySelector('#teclado');
@@ -169,11 +182,13 @@
         });
         teclado.appendChild(plano);
       });
+
       criarBotaoExtra('Apagar', -1, startY - 2 * espacamentoY, () => {
         if(finalizou) return;
         let textoAtual = textoDigitado.getAttribute('value');
         textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
       }, '#ffffff', 0.2);
+
       criarBotaoExtra('Entrar', 1, startY - 2 * espacamentoY, () => {
         if(finalizou) return;
         const texto = textoDigitado.getAttribute('value').trim().toUpperCase();
