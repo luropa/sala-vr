@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Holograma Interativo)</title>
+  <title>Holo - Robô Educacional (Gaze 2s para Rotação)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style> body { margin: 0; } </style>
 </head>
@@ -29,8 +29,8 @@
     <!-- Chão transparente leve -->
     <a-plane rotation="-90 0 0" width="20" height="20" color="#FFFFFF" opacity="0.05"></a-plane>
 
-    <!-- Câmera + cursor para detectar olhar -->
-    <a-entity id="cameraRig" position="0 1.6 3">
+    <!-- Câmera na altura do robô + cursor gaze -->
+    <a-entity id="cameraRig" position="0 1.5 3">
       <a-entity camera look-controls>
         <a-cursor 
           fuse="true" 
@@ -47,45 +47,23 @@
     let rotacionando = false;
     let rotacaoAtual = 0;
     let ultimaAtualizacao = Date.now();
-    let jaFalou = false;
 
-    // Faz o robô falar ao ser olhado
-    holo.addEventListener("mouseenter", () => {
-      if (jaFalou) return;
-      jaFalou = true;
-
-      const msg = new SpeechSynthesisUtterance(
-        "Olá! Eu sou Holo! Fique me olhando por dois segundos para girar ao meu redor."
-      );
-      msg.lang = "pt-BR";
-      msg.pitch = 1.2;
-      msg.rate = 1.0;
-      speechSynthesis.speak(msg);
-
-      setTimeout(() => (jaFalou = false), 10000);
-    });
-
-    // Ativa/desativa rotação ao olhar por 2s
+    // Alternar rotação com gaze de 2 segundos
     holo.addEventListener("click", () => {
       rotacionando = !rotacionando;
-      const msg = new SpeechSynthesisUtterance(
-        rotacionando ? "Iniciando rotação..." : "Parando rotação."
-      );
-      msg.lang = "pt-BR";
-      speechSynthesis.speak(msg);
     });
 
-    // Rotação suave contínua
+    // Movimento suave da câmera ao redor do robô
     function atualizarRotacao() {
       const agora = Date.now();
       const delta = (agora - ultimaAtualizacao) / 1000;
       ultimaAtualizacao = agora;
 
       if (rotacionando) {
-        rotacaoAtual += 10 * delta; // velocidade de rotação (graus/s)
+        rotacaoAtual += 10 * delta; // velocidade em graus/s
         rig.setAttribute("position", {
           x: 3 * Math.sin(THREE.MathUtils.degToRad(rotacaoAtual)),
-          y: 1.6,
+          y: 1.5, // mesma altura do robô
           z: 3 * Math.cos(THREE.MathUtils.degToRad(rotacaoAtual))
         });
         rig.object3D.lookAt(holo.object3D.position);
