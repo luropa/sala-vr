@@ -2,14 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze 2s Rotação)</title>
+  <title>Holo - Robô Educacional (Gaze 2s Rotação Automática)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style> body { margin: 0; } </style>
 </head>
 <body>
   <a-scene background="color: #E9F4FF">
     <a-assets>
-      <!-- Modelo 3D do robô -->
       <a-asset-item id="holoModel" src="./holo.glb"></a-asset-item>
     </a-assets>
 
@@ -45,18 +44,30 @@
     const holo = document.querySelector("#holo");
     let rotacionando = false;
     let rotacaoAtual = 0;
+    const rotacaoAlvo = 360; // uma volta completa
 
-    // Alterna rotação do robô quando gaze de 2s é completada
+    // Gaze de 2s ativa a rotação
     holo.addEventListener("click", () => {
-      rotacionando = !rotacionando;
+      if (!rotacionando) {
+        rotacaoAtual = 0; // reinicia contagem
+        rotacionando = true;
+      }
     });
 
-    // Atualiza rotação do robô
+    // Rotação automática do robô até completar 360°
     function atualizarRotacao() {
       if (rotacionando) {
-        rotacaoAtual += 1; // velocidade da rotação em graus por frame
-        holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
+        const velocidade = 1.5; // graus por frame (ajuste para VR mais suave)
+        rotacaoAtual += velocidade;
+
+        if (rotacaoAtual >= rotacaoAlvo) {
+          rotacaoAtual = rotacaoAlvo;
+          rotacionando = false; // para após uma volta
+        }
+
+        holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
       }
+
       requestAnimationFrame(atualizarRotacao);
     }
 
