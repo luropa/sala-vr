@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze para Pausar/Continuar)</title>
+  <title>Holo - Robô Educacional (Gaze Pause/Continue)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style> body { margin: 0; } </style>
 </head>
@@ -31,43 +31,39 @@
     <!-- Câmera fixa + cursor gaze -->
     <a-entity id="cameraRig" position="0 1.5 3">
       <a-entity camera look-controls>
-        <a-cursor 
-          fuse="true" 
-          fuse-timeout="2000"
-          material="color: #00ccff; shader: flat"></a-cursor>
+        <a-cursor fuse="true" fuse-timeout="2000" material="color: #00ccff; shader: flat"></a-cursor>
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     const holo = document.querySelector("#holo");
-    let rotacionando = false;  // indica se a rotação está ativa
-    let rotacaoAtual = 0;      // rotação acumulada
-    const rotacaoAlvo = 360;   // uma volta completa
+    let rotacionando = false;      // indica se o robô está girando
+    let rotacaoAtual = 0;          // rotação acumulada
+    const rotacaoAlvo = 360;       // uma volta completa
     let ultimoTempo = null;
 
-    // Gaze: alterna entre iniciar/pausar rotação
+    // Gaze: alterna entre pausar e continuar a rotação
     holo.addEventListener("click", () => {
-      if (rotacaoAtual >= rotacaoAlvo) {
-        // reinicia a rotação se já completou uma volta
-        rotacaoAtual = 0;
+      // só permite iniciar/continuar se ainda não completou 360°
+      if (rotacaoAtual < rotacaoAlvo) {
+        rotacionando = !rotacionando;
       }
-      rotacionando = !rotacionando;
     });
 
-    // Função de atualização da rotação
+    // Função de rotação suave baseada em tempo real
     function atualizarRotacao(timestamp) {
       if (!ultimoTempo) ultimoTempo = timestamp;
       const delta = timestamp - ultimoTempo;
       ultimoTempo = timestamp;
 
-      if (rotacionando && rotacaoAtual < rotacaoAlvo) {
+      if (rotacionando) {
         const velocidade = 60; // graus por segundo
         rotacaoAtual += velocidade * (delta / 1000);
 
         if (rotacaoAtual >= rotacaoAlvo) {
           rotacaoAtual = rotacaoAlvo;
-          rotacionando = false; // para automaticamente após 360°
+          rotacionando = false; // para após 360°
         }
 
         holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
