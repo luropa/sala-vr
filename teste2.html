@@ -31,39 +31,50 @@
     <!-- Câmera fixa + cursor gaze -->
     <a-entity id="cameraRig" position="0 1.5 3">
       <a-entity camera look-controls>
-        <a-cursor fuse="true" fuse-timeout="2000" material="color: #00ccff; shader: flat"></a-cursor>
+        <a-cursor 
+          fuse="true" 
+          fuse-timeout="100" <!-- tempo curto para detectar gaze -->
+          material="color: #00ccff; shader: flat"
+          raycaster="objects: #holo">
+        </a-cursor>
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     const holo = document.querySelector("#holo");
-    let rotacionando = false;      // indica se o robô está girando
-    let rotacaoAtual = 0;          // rotação acumulada
-    const rotacaoAlvo = 360;       // uma volta completa
+    const cursor = document.querySelector("a-cursor");
+    let rotacionando = false;  // indica se o robô está girando
+    let rotacaoAtual = 0;      // rotação acumulada
+    const rotacaoAlvo = 360;   // uma volta completa
     let ultimoTempo = null;
+    let completouVolta = false;
 
-    // Gaze: alterna entre pausar e continuar a rotação
-    holo.addEventListener("click", () => {
-      // só permite iniciar/continuar se ainda não completou 360°
-      if (rotacaoAtual < rotacaoAlvo) {
-        rotacionando = !rotacionando;
+    // Detecta gaze: cursor intersectando o robô
+    cursor.addEventListener("mouseenter", () => {
+      if (!completouVolta) {
+        rotacionando = true; // inicia ou retoma a rotação
       }
     });
 
-    // Função de rotação suave baseada em tempo real
+    cursor.addEventListener("mouseleave", () => {
+      rotacionando = false; // pausa quando olhar sai
+    });
+
+    // Atualização da rotação baseada no tempo
     function atualizarRotacao(timestamp) {
       if (!ultimoTempo) ultimoTempo = timestamp;
       const delta = timestamp - ultimoTempo;
       ultimoTempo = timestamp;
 
-      if (rotacionando) {
-        const velocidade = 60; // graus por segundo
+      if (rotacionando && !completouVolta) {
+        const velocidade = 20; // velocidade menor, graus por segundo
         rotacaoAtual += velocidade * (delta / 1000);
 
         if (rotacaoAtual >= rotacaoAlvo) {
           rotacaoAtual = rotacaoAlvo;
-          rotacionando = false; // para após 360°
+          rotacionando = false;
+          completouVolta = true; // não permite outra volta
         }
 
         holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
