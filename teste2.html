@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze Pause/Resume VR Box)</title>
+  <title>Holo - Robô Educacional (Gaze contínuo VR Box)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style> body { margin: 0; } </style>
 </head>
@@ -12,10 +12,9 @@
     <a-asset-item id="holoModel" src="./holo.glb"></a-asset-item>
   </a-assets>
 
-  <!-- Luz ambiente -->
   <a-entity light="type: ambient; intensity: 1.4; color: #FFFFFF"></a-entity>
 
-  <!-- Robô flutuante com efeito holográfico -->
+  <!-- Robô flutuante -->
   <a-entity id="holo"
     gltf-model="#holoModel"
     position="0 1.5 0"
@@ -25,13 +24,12 @@
     animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 1.7 0">
   </a-entity>
 
-  <!-- Chão transparente -->
   <a-plane rotation="-90 0 0" width="20" height="20" color="#FFFFFF" opacity="0.05"></a-plane>
 
-  <!-- Câmera fixa + cursor gaze -->
+  <!-- Câmera fixa + cursor -->
   <a-entity id="cameraRig" position="0 1.5 3">
     <a-entity camera look-controls>
-      <a-cursor fuse="true" fuse-timeout="2000" material="color: #00ccff; shader: flat"></a-cursor>
+      <a-cursor fuse="true" fuse-timeout="500" material="color: #00ccff; shader: flat" raycaster="objects: #holo"></a-cursor>
     </a-entity>
   </a-entity>
 </a-scene>
@@ -42,43 +40,33 @@ const cursor = document.querySelector("a-cursor");
 
 let rotacionando = false;
 let rotacaoAtual = 0;
-const rotacaoAlvo = 360; // uma volta completa
+const rotacaoAlvo = 360;
 let ultimoTempo = null;
 let completouVolta = false;
 
-// Gaze inicia a rotação
-holo.addEventListener("click", () => {
+// Função para checar a interseção do cursor a cada frame
+function checarGaze() {
+  const intersects = cursor.components.raycaster.intersectedEls;
   if (!completouVolta) {
-    rotacionando = true;
+    rotacionando = intersects.includes(holo);
   }
-});
+  requestAnimationFrame(checarGaze);
+}
 
-// Pausa a rotação quando o olhar sai
-holo.addEventListener("mouseleave", () => {
-  rotacionando = false;
-});
-
-// Retoma rotação ao olhar novamente
-holo.addEventListener("mouseenter", () => {
-  if (!completouVolta) {
-    rotacionando = true;
-  }
-});
-
-// Atualiza rotação baseada no tempo
+// Rotação baseada em tempo
 function atualizarRotacao(timestamp) {
   if (!ultimoTempo) ultimoTempo = timestamp;
   const delta = timestamp - ultimoTempo;
   ultimoTempo = timestamp;
 
   if (rotacionando && !completouVolta) {
-    const velocidade = 10; // velocidade lenta
+    const velocidade = 10; // lento
     rotacaoAtual += velocidade * (delta / 1000);
 
     if (rotacaoAtual >= rotacaoAlvo) {
       rotacaoAtual = rotacaoAlvo;
       rotacionando = false;
-      completouVolta = true; // não permite outra volta
+      completouVolta = true;
     }
 
     holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
@@ -87,6 +75,8 @@ function atualizarRotacao(timestamp) {
   requestAnimationFrame(atualizarRotacao);
 }
 
+// Inicia os loops
+requestAnimationFrame(checarGaze);
 requestAnimationFrame(atualizarRotacao);
 </script>
 </body>
