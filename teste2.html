@@ -2,70 +2,99 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (fala ao olhar)</title>
+  <title>Holo - Robô Educacional (Holograma Interativo)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <style>
-    body { margin: 0; background-color: #D9EEFF; }
-  </style>
+  <style> body { margin: 0; } </style>
 </head>
 <body>
-  <a-scene background="color: #D9EEFF">
+  <a-scene background="color: #E9F4FF">
     <a-assets>
+      <!-- modelo 3D do robô -->
       <a-asset-item id="holoModel" src="./holo.glb"></a-asset-item>
     </a-assets>
 
-    <!-- Luzes -->
-    <a-entity light="type: ambient; intensity: 1.4; color: #aaddff"></a-entity>
-    <a-entity light="type: point; intensity: 1.8; distance: 8; decay: 2; color: #00ccff" position="0 2 -2"></a-entity>
+    <!-- Luz ambiente clara -->
+    <a-entity light="type: ambient; intensity: 1.4; color: #FFFFFF"></a-entity>
 
-    <!-- Robô Holo -->
+    <!-- Robô flutuante com efeito holográfico -->
     <a-entity id="holo"
-              gltf-model="#holoModel"
-              position="0 1.5 0"
-              rotation="0 -90 0"
-              scale="3 3 3"
-              material="color: #00ccff; metalness: 0.1; roughness: 0.2; opacity: 0.65; transparent: true; emissive: #00ffff; emissiveIntensity: 1.0"
-              animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 1.8 0"
-              animation__glow="property: material.emissiveIntensity; dir: alternate; dur: 1500; easing: easeInOutSine; loop: true; to: 1.7">
+      gltf-model="#holoModel"
+      position="0 1.5 0"
+      rotation="0 -90 0"
+      scale="3 3 3"
+      material="color: #88ccff; opacity: 0.75; transparent: true; emissive: #00ccff; emissiveIntensity: 0.4"
+      animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 1.7 0">
     </a-entity>
 
-    <!-- Câmera orbitando o robô -->
+    <!-- Chão transparente leve -->
+    <a-plane rotation="-90 0 0" width="20" height="20" color="#FFFFFF" opacity="0.05"></a-plane>
+
+    <!-- Câmera + cursor para detectar olhar -->
     <a-entity id="cameraRig" position="0 1.6 3">
-      <a-entity camera look-controls wasd-controls-enabled="false">
+      <a-entity camera look-controls>
         <a-cursor 
           fuse="true" 
-          fuse-timeout="1000" 
+          fuse-timeout="2000"
           material="color: #00ccff; shader: flat">
         </a-cursor>
       </a-entity>
-      <!-- Animação de rotação ao redor do robô -->
-      <a-animation 
-        attribute="rotation" 
-        dur="20000" 
-        to="0 360 0" 
-        easing="linear" 
-        repeat="indefinite">
-      </a-animation>
     </a-entity>
   </a-scene>
 
   <script>
     const holo = document.querySelector("#holo");
+    const rig = document.querySelector("#cameraRig");
+    let rotacionando = false;
+    let rotacaoAtual = 0;
+    let ultimaAtualizacao = Date.now();
     let jaFalou = false;
 
+    // Faz o robô falar ao ser olhado
     holo.addEventListener("mouseenter", () => {
       if (jaFalou) return;
       jaFalou = true;
 
-      const mensagem = new SpeechSynthesisUtterance("Olá! Eu sou Holo! E você?");
-      mensagem.lang = "pt-BR";
-      mensagem.pitch = 1.2;
-      mensagem.rate = 1.0;
-      speechSynthesis.speak(mensagem);
+      const msg = new SpeechSynthesisUtterance(
+        "Olá! Eu sou Holo! Fique me olhando por dois segundos para girar ao meu redor."
+      );
+      msg.lang = "pt-BR";
+      msg.pitch = 1.2;
+      msg.rate = 1.0;
+      speechSynthesis.speak(msg);
 
-      setTimeout(() => jaFalou = false, 10000);
+      setTimeout(() => (jaFalou = false), 10000);
     });
+
+    // Ativa/desativa rotação ao olhar por 2s
+    holo.addEventListener("click", () => {
+      rotacionando = !rotacionando;
+      const msg = new SpeechSynthesisUtterance(
+        rotacionando ? "Iniciando rotação..." : "Parando rotação."
+      );
+      msg.lang = "pt-BR";
+      speechSynthesis.speak(msg);
+    });
+
+    // Rotação suave contínua
+    function atualizarRotacao() {
+      const agora = Date.now();
+      const delta = (agora - ultimaAtualizacao) / 1000;
+      ultimaAtualizacao = agora;
+
+      if (rotacionando) {
+        rotacaoAtual += 10 * delta; // velocidade de rotação (graus/s)
+        rig.setAttribute("position", {
+          x: 3 * Math.sin(THREE.MathUtils.degToRad(rotacaoAtual)),
+          y: 1.6,
+          z: 3 * Math.cos(THREE.MathUtils.degToRad(rotacaoAtual))
+        });
+        rig.object3D.lookAt(holo.object3D.position);
+      }
+
+      requestAnimationFrame(atualizarRotacao);
+    }
+
+    atualizarRotacao();
   </script>
 </body>
 </html>
-
