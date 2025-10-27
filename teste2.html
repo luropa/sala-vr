@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze 2s Rotação Automática)</title>
+  <title>Holo - Robô Educacional (Gaze 2s Rotação Completa)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style> body { margin: 0; } </style>
 </head>
@@ -15,7 +15,7 @@
     <!-- Luz ambiente clara -->
     <a-entity light="type: ambient; intensity: 1.4; color: #FFFFFF"></a-entity>
 
-    <!-- Robô flutuante com efeito holográfico -->
+    <!-- Robô flutuante -->
     <a-entity id="holo"
       gltf-model="#holoModel"
       position="0 1.5 0"
@@ -25,17 +25,13 @@
       animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 1.7 0">
     </a-entity>
 
-    <!-- Chão transparente leve -->
+    <!-- Chão transparente -->
     <a-plane rotation="-90 0 0" width="20" height="20" color="#FFFFFF" opacity="0.05"></a-plane>
 
     <!-- Câmera fixa na altura do robô + cursor gaze -->
     <a-entity id="cameraRig" position="0 1.5 3">
       <a-entity camera look-controls>
-        <a-cursor 
-          fuse="true" 
-          fuse-timeout="2000"
-          material="color: #00ccff; shader: flat">
-        </a-cursor>
+        <a-cursor fuse="true" fuse-timeout="2000" material="color: #00ccff; shader: flat"></a-cursor>
       </a-entity>
     </a-entity>
   </a-scene>
@@ -45,24 +41,28 @@
     let rotacionando = false;
     let rotacaoAtual = 0;
     const rotacaoAlvo = 360; // uma volta completa
+    let ultimoTempo = null;
 
-    // Gaze de 2s ativa a rotação
+    // Ativa rotação ao olhar por 2s
     holo.addEventListener("click", () => {
       if (!rotacionando) {
-        rotacaoAtual = 0; // reinicia contagem
+        rotacaoAtual = 0; // reinicia
         rotacionando = true;
       }
     });
 
-    // Rotação automática do robô até completar 360°
-    function atualizarRotacao() {
+    function atualizarRotacao(timestamp) {
+      if (!ultimoTempo) ultimoTempo = timestamp;
+      const delta = timestamp - ultimoTempo;
+      ultimoTempo = timestamp;
+
       if (rotacionando) {
-        const velocidade = 1.5; // graus por frame (ajuste para VR mais suave)
-        rotacaoAtual += velocidade;
+        const velocidade = 60; // graus por segundo
+        rotacaoAtual += velocidade * (delta / 1000); // incremento baseado em tempo real
 
         if (rotacaoAtual >= rotacaoAlvo) {
           rotacaoAtual = rotacaoAlvo;
-          rotacionando = false; // para após uma volta
+          rotacionando = false; // para após 360°
         }
 
         holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
@@ -71,7 +71,7 @@
       requestAnimationFrame(atualizarRotacao);
     }
 
-    atualizarRotacao();
+    requestAnimationFrame(atualizarRotacao);
   </script>
 </body>
 </html>
