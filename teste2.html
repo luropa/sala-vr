@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze Pause/Continue)</title>
+  <title>Holo - Robô Educacional (Gaze Pause/Resume)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style> body { margin: 0; } </style>
 </head>
@@ -31,9 +31,9 @@
     <!-- Câmera fixa + cursor gaze -->
     <a-entity id="cameraRig" position="0 1.5 3">
       <a-entity camera look-controls>
-        <a-cursor 
-          fuse="true" 
-          fuse-timeout="100" <!-- tempo curto para detectar gaze -->
+        <a-cursor
+          fuse="true"
+          fuse-timeout="500"
           material="color: #00ccff; shader: flat"
           raycaster="objects: #holo">
         </a-cursor>
@@ -44,37 +44,37 @@
   <script>
     const holo = document.querySelector("#holo");
     const cursor = document.querySelector("a-cursor");
-    let rotacionando = false;  // indica se o robô está girando
-    let rotacaoAtual = 0;      // rotação acumulada
-    const rotacaoAlvo = 360;   // uma volta completa
+    let rotacionando = false;
+    let rotacaoAtual = 0;
+    const rotacaoAlvo = 360; // uma volta completa
     let ultimoTempo = null;
     let completouVolta = false;
 
-    // Detecta gaze: cursor intersectando o robô
-    cursor.addEventListener("mouseenter", () => {
+    // Detecta gaze usando eventos do cursor
+    cursor.addEventListener("raycaster-intersected", () => {
       if (!completouVolta) {
-        rotacionando = true; // inicia ou retoma a rotação
+        rotacionando = true; // inicia ou continua
       }
     });
 
-    cursor.addEventListener("mouseleave", () => {
+    cursor.addEventListener("raycaster-intersected-cleared", () => {
       rotacionando = false; // pausa quando olhar sai
     });
 
-    // Atualização da rotação baseada no tempo
+    // Atualiza rotação baseada no tempo
     function atualizarRotacao(timestamp) {
       if (!ultimoTempo) ultimoTempo = timestamp;
       const delta = timestamp - ultimoTempo;
       ultimoTempo = timestamp;
 
       if (rotacionando && !completouVolta) {
-        const velocidade = 20; // velocidade menor, graus por segundo
+        const velocidade = 15; // velocidade reduzida (graus por segundo)
         rotacaoAtual += velocidade * (delta / 1000);
 
         if (rotacaoAtual >= rotacaoAlvo) {
           rotacaoAtual = rotacaoAlvo;
           rotacionando = false;
-          completouVolta = true; // não permite outra volta
+          completouVolta = true;
         }
 
         holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
