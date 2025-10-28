@@ -1,95 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (rotação rápida com gaze e fala)</title>
+  <meta charset="utf-8">
+  <title>Holo - Robô Educacional (gaze cabeça + braços)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style>body { margin: 0; }</style>
 </head>
 <body>
-  <a-scene background="color: #E8F0FF">
-    <a-assets>
-      <a-asset-item id="holoModel" src="holo.glb"></a-asset-item>
-    </a-assets>
+<a-scene background="color: #E8F0FF">
+  <a-assets>
+    <a-asset-item id="holoModel" src="holo.glb"></a-asset-item>
+  </a-assets>
 
-    <!-- Luzes -->
-    <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
-    <a-entity light="type: directional; intensity: 0.5; color: #ffffff" position="2 4 1" shadow="cast: false"></a-entity>
+  <!-- Luzes -->
+  <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
+  <a-entity light="type: directional; intensity: 0.5; color: #ffffff" position="2 4 1" shadow="cast: false"></a-entity>
 
-    <!-- Robô Holo -->
-    <a-entity id="holo"
-              gltf-model="#holoModel"
-              position="0 1.5 -3"
-              rotation="0 -90 0"
-              scale="3 3 3"
-              material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
-              animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 1.7 -3">
+  <!-- Robô Holo -->
+  <a-entity id="holo"
+            gltf-model="#holoModel"
+            position="0 1.5 -3"
+            rotation="0 -90 0"
+            scale="3 3 3"
+            material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
+            animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 1.7 -3">
 
-      <!-- Área invisível para olhar na cabeça -->
-      <a-box id="cabeça" position="0 0.7 0" width="0.6" height="0.6" depth="0.6" opacity="0" visible="false"></a-box>
+    <!-- Áreas de gaze -->
+    <a-box id="cabeca" position="0 0.7 0" width="0.6" height="0.6" depth="0.6" opacity="0" visible="false"></a-box>
+    <a-box id="braco-esq" position="-0.9 0 0" width="0.5" height="0.5" depth="0.5" opacity="0" visible="false"></a-box>
+    <a-box id="braco-dir" position="0.9 0 0" width="0.5" height="0.5" depth="0.5" opacity="0" visible="false"></a-box>
 
-    </a-entity>
-   
-    <!-- Câmera de frente para o robô -->
-    <a-entity id="camera" camera look-controls position="0 1.6 2" look-at="#holo">
-      <a-cursor 
-        fuse="true" 
-        fuse-timeout="1500" 
-        material="color: #00ccff; shader: flat">
-      </a-cursor>
-    </a-entity>
-  </a-scene>
+  </a-entity>
 
-  <script>
-    const holo = document.querySelector("#holo");
-    const cabeca = document.querySelector("#cabeça");
-    let girando = false;
-    let rotacaoAtual = -90; // posição inicial
-    let totalRotacao = 0;
-    let animacaoAtiva = true;
-    let jaFalou = false;
+  <!-- Câmera -->
+  <a-entity id="camera" camera look-controls position="0 1.6 2">
+    <a-cursor fuse="true" fuse-timeout="1500" material="color: #00ccff; shader: flat"></a-cursor>
+  </a-entity>
+</a-scene>
 
-    function girar() {
-      if (girando && animacaoAtiva) {
-        rotacaoAtual += 2; // giro mais rápido
-        totalRotacao += 2;
-        holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
-        
-        if (totalRotacao >= 360) {
-          animacaoAtiva = false;
-          girando = false;
-          return;
-        }
-        requestAnimationFrame(girar);
-      }
-    }
+<script>
+const holo = document.querySelector("#holo");
+const cabeca = document.querySelector("#cabeca");
+const bracoEsq = document.querySelector("#braco-esq");
+const bracoDir = document.querySelector("#braco-dir");
 
-    // Rotação com gaze no robô
-    holo.addEventListener("mouseenter", () => {
-      if (animacaoAtiva) {
-        girando = true;
-        girar();
-      }
-    });
+let jaFalou = false;
+let girando = false;
+let sentido = 1; // 1 = horário, -1 = anti-horário
+let rotacaoAtual = -90;
+let totalRotacao = 0;
+let animacaoAtiva = true;
 
-    holo.addEventListener("mouseleave", () => {
+// Função de rotação
+function girar() {
+  if (girando && animacaoAtiva) {
+    rotacaoAtual += 2 * sentido;
+    totalRotacao += 2;
+    holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
+
+    if (totalRotacao >= 360) {
+      animacaoAtiva = false;
       girando = false;
-    });
+      return;
+    }
+    requestAnimationFrame(girar);
+  }
+}
 
-    // Fala ao olhar para a cabeça
-    cabeca.addEventListener("mouseenter", () => {
-      if (jaFalou) return;
-      jaFalou = true;
+// Fala ao olhar para a cabeça
+cabeca.addEventListener("mouseenter", () => {
+  if (jaFalou) return;
+  jaFalou = true;
 
-      const mensagem = new SpeechSynthesisUtterance("Olá! Eu sou Holo! E você?");
-      mensagem.lang = "pt-BR";
-      mensagem.pitch = 1.2;
-      mensagem.rate = 1.0;
-      speechSynthesis.speak(mensagem);
+  const mensagem = new SpeechSynthesisUtterance("Olá! Eu sou Holo! E você?");
+  mensagem.lang = "pt-BR";
+  mensagem.pitch = 1.2;
+  mensagem.rate = 1.0;
+  speechSynthesis.speak(mensagem);
 
-      // Permite nova fala depois de 10 segundos
-      setTimeout(() => jaFalou = false, 10000);
-    });
-  </script>
+  setTimeout(() => jaFalou = false, 10000);
+});
+
+// Iniciar rotação ao olhar para braços
+bracoEsq.addEventListener("mouseenter", () => {
+  if(animacaoAtiva){
+    sentido = -1;
+    girando = true;
+    girar();
+  }
+});
+
+bracoDir.addEventListener("mouseenter", () => {
+  if(animacaoAtiva){
+    sentido = 1;
+    girando = true;
+    girar();
+  }
+});
+
+// Pausa ao desviar
+bracoEsq.addEventListener("mouseleave", () => { girando = false; });
+bracoDir.addEventListener("mouseleave", () => { girando = false; });
+</script>
 </body>
 </html>
