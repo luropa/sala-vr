@@ -1,3 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Holo - Robô Educacional</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Luz ambiente e de direção -->
+      <a-entity light="type: ambient; intensity: 1"></a-entity>
+      <a-entity light="type: directional; intensity: 0.6" position="1 1 0"></a-entity>
+
+      <!-- Chão -->
+      <a-plane rotation="-90 0 0" width="10" height="10" color="#ccc"></a-plane>
+
+      <!-- Robô -->
+      <a-assets>
+        <a-asset-item id="modeloRobo" src="robo.glb"></a-asset-item>
+      </a-assets>
+
+      <a-entity id="robo"
+        gltf-model="#modeloRobo"
+        position="0 1 -2"
+        scale="1.5 1.5 1.5"
+        rotation="0 180 0"
+        gira-robo>
+      </a-entity>
+
+      <!-- Câmera e cursor gaze -->
+      <a-entity camera look-controls>
+        <a-entity
+          cursor="fuse: true; fuseTimeout: 2000"
+          position="0 0 -1"
+          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+          material="color: white; shader: flat">
+        </a-entity>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // Componente de rotação do robô
+      AFRAME.registerComponent('gira-robo', {
+        init: function () {
+          const robo = this.el;
+          let girando = false;
+
+          // Função de rotação contínua
+          function rotacionar() {
+            if (girando) {
+              const rot = robo.getAttribute('rotation');
+              rot.y += 1;
+              robo.setAttribute('rotation', rot);
+              requestAnimationFrame(rotacionar);
+            }
+          }
+
+          // Inicia rotação ao olhar
+          robo.addEventListener('mouseenter', () => {
+            girando = true;
+            rotacionar();
+          });
+
+          // Para ao sair do olhar
+          robo.addEventListener('mouseleave', () => {
+            girando = false;
+          });
+
+          // 👇 Força rotação inicial se o gaze já estiver sobre o robô
+          this.el.sceneEl.addEventListener('loaded', () => {
+            setTimeout(() => {
+              const camera = document.querySelector('[camera]');
+              const raycaster = camera.components.cursor?.raycaster || camera.components.raycaster;
+              if (raycaster) {
+                const intersects = raycaster.intersectedEls;
+                if (intersects && intersects.includes(robo)) {
+                  girando = true;
+                  rotacionar();
+                }
+              }
+            }, 1000); // 1s para garantir que tudo carregou
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
 <a-entity id="robo"
   gltf-model="#modeloRobo"
   position="0 1 -2"
