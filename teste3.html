@@ -45,8 +45,8 @@
 
     function girar() {
       if (girando && animacaoAtiva) {
-        rotacaoAtual += 0.6; // giro um pouco mais rápido
-        totalRotacao += 0.6;
+        rotacaoAtual += 1; // giro um pouco mais rápido
+        totalRotacao += 1;
         holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
         
         if (totalRotacao >= 360) {
