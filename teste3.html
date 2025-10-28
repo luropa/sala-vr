@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (rotação com gaze)</title>
+  <title>Holo - Robô Educacional (rotação rápida com gaze)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style>body { margin: 0; }</style>
 </head>
@@ -45,8 +45,8 @@
 
     function girar() {
       if (girando && animacaoAtiva) {
-        rotacaoAtual += 1; // giro um pouco mais rápido
-        totalRotacao += 1;
+        rotacaoAtual += 2; // giro mais rápido
+        totalRotacao += 2;
         holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
         
         if (totalRotacao >= 360) {
