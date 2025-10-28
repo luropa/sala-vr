@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+v<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <title>Holo - Robô Educacional (gaze natural)</title>
+  <title>Holo - Robô Educacional (gaze correto)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style>body { margin: 0; }</style>
 </head>
@@ -24,15 +24,16 @@
             scale="4 4 4"
             material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
             animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 1.7 -3">
-  </a-entity>
 
-  <!-- Áreas invisíveis para gaze ajustadas -->
-  <!-- Boca -->
-  <a-box id="boca" position="0 1.65 -3" width="0.6" height="0.2" depth="0.4" opacity="0" visible="false"></a-box>
-  <!-- Braço esquerdo -->
-  <a-box id="braço-esq" position="-0.8 1.55 -3" width="0.5" height="0.5" depth="0.5" opacity="0" visible="false"></a-box>
-  <!-- Braço direito -->
-  <a-box id="braço-dir" position="0.8 1.55 -3" width="0.5" height="0.5" depth="0.5" opacity="0" visible="false"></a-box>
+    <!-- Áreas de gaze como filhos do Holo -->
+    <!-- Boca -->
+    <a-box id="boca" position="0 0.15 0.3" width="0.6" height="0.2" depth="0.4" opacity="0" visible="false"></a-box>
+    <!-- Braço esquerdo -->
+    <a-box id="braço-esq" position="-0.9 0 0" width="0.5" height="0.5" depth="0.5" opacity="0" visible="false"></a-box>
+    <!-- Braço direito -->
+    <a-box id="braço-dir" position="0.9 0 0" width="0.5" height="0.5" depth="0.5" opacity="0" visible="false"></a-box>
+
+  </a-entity>
 
   <!-- Câmera de frente para o robô -->
   <a-entity id="camera" camera look-controls position="0 1.6 2" look-at="#holo">
