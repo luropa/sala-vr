@@ -1,88 +1,50 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze VR Box funcional)</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <style> body { margin: 0; background-color: #E9F4FF; } </style>
-</head>
-<body>
-  <a-scene background="color: #E9F4FF">
-    <a-assets>
-      <a-asset-item id="holoModel" src="./holo.glb"></a-asset-item>
-    </a-assets>
+<a-entity id="robo"
+  gltf-model="#modeloRobo"
+  position="0 1 -2"
+  scale="1.5 1.5 1.5"
+  rotation="0 180 0">
+</a-entity>
 
-    <!-- Luz ambiente suave -->
-    <a-entity light="type: ambient; intensity: 1.4; color: #ffffff"></a-entity>
+<script>
+  AFRAME.registerComponent('gira-robo', {
+    init: function () {
+      const robo = this.el;
+      let girando = false;
 
-    <!-- Robô com efeito holográfico -->
-    <a-entity id="holo"
-      gltf-model="#holoModel"
-      position="0 1.5 0"
-      rotation="0 -90 0"
-      scale="3 3 3"
-      material="color: #88ccff; opacity: 0.75; transparent: true; emissive: #00ccff; emissiveIntensity: 0.4"
-      animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 1.7 0">
-    </a-entity>
-
-    <!-- Chão quase invisível -->
-    <a-plane rotation="-90 0 0" width="20" height="20" color="#FFFFFF" opacity="0.03"></a-plane>
-
-    <!-- Câmera fixa + cursor com gaze -->
-    <a-entity id="cameraRig" position="0 1.5 3">
-      <a-entity camera look-controls>
-        <a-cursor 
-          fuse="true" 
-          fuse-timeout="500" 
-          material="color: #00ccff; shader: flat"
-          raycaster="objects: *; interval: 100">
-        </a-cursor>
-      </a-entity>
-    </a-entity>
-  </a-scene>
-
-  <script>
-    const holo = document.querySelector("#holo");
-    const cursor = document.querySelector("a-cursor");
-
-    let rotacionando = false;
-    let rotacaoAtual = 0;
-    const velocidade = 8; // lenta
-    const rotacaoFinal = 360;
-    let completouVolta = false;
-    let ultimoTempo = null;
-
-    // detecta quando o cursor está olhando pro robô
-    holo.addEventListener("raycaster-intersected", () => {
-      if (!completouVolta) rotacionando = true;
-    });
-
-    holo.addEventListener("raycaster-intersected-cleared", () => {
-      rotacionando = false;
-    });
-
-    // função de rotação com pausa
-    function animar(timestamp) {
-      if (!ultimoTempo) ultimoTempo = timestamp;
-      const delta = timestamp - ultimoTempo;
-      ultimoTempo = timestamp;
-
-      if (rotacionando && !completouVolta) {
-        rotacaoAtual += (velocidade * delta) / 1000;
-
-        if (rotacaoAtual >= rotacaoFinal) {
-          rotacaoAtual = rotacaoFinal;
-          completouVolta = true;
-          rotacionando = false;
+      // Função de rotação contínua
+      function rotacionar() {
+        if (girando) {
+          let rot = robo.getAttribute('rotation');
+          rot.y += 1;
+          robo.setAttribute('rotation', rot);
+          requestAnimationFrame(rotacionar);
         }
-
-        holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
       }
 
-      requestAnimationFrame(animar);
-    }
+      // Inicia rotação ao olhar
+      robo.addEventListener('mouseenter', () => {
+        girando = true;
+        rotacionar();
+      });
 
-    requestAnimationFrame(animar);
-  </script>
-</body>
-</html>
+      // Para ao sair do olhar
+      robo.addEventListener('mouseleave', () => {
+        girando = false;
+      });
+
+      // 👇 Força rotação inicial se o gaze já estiver sobre o robô
+      setTimeout(() => {
+        const camera = document.querySelector('[camera]');
+        if (camera && camera.components.raycaster) {
+          const intersects = camera.components.raycaster.intersectedEls;
+          if (intersects.includes(robo)) {
+            girando = true;
+            rotacionar();
+          }
+        }
+      }, 1000); // espera 1s para garantir que o gaze e o modelo carregaram
+    }
+  });
+
+  document.querySelector('#robo').setAttribute('gira-robo', '');
+</script>
