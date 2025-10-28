@@ -9,11 +9,10 @@
 <body>
   <a-scene background="color: #E8F0FF">
     <a-assets>
-      <!-- modelo 3D do robô -->
       <a-asset-item id="holoModel" src="holo.glb"></a-asset-item>
     </a-assets>
 
-    <!-- Luz ambiente e direcional sem sombra -->
+    <!-- Luzes -->
     <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
     <a-entity light="type: directional; intensity: 0.5; color: #ffffff" position="2 4 1" shadow="cast: false"></a-entity>
 
@@ -27,8 +26,8 @@
               animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 1.7 -3">
     </a-entity>
    
-    <!-- Câmera com cursor gaze -->
-    <a-entity camera look-controls position="0 1.6 0">
+    <!-- Câmera de frente para o robô -->
+    <a-entity id="camera" camera look-controls position="0 1.6 2" look-at="#holo">
       <a-cursor 
         fuse="true" 
         fuse-timeout="1500" 
@@ -40,17 +39,16 @@
   <script>
     const holo = document.querySelector("#holo");
     let girando = false;
-    let rotacaoAtual = -90; // começa virado para frente
+    let rotacaoAtual = -90; // posição inicial
     let totalRotacao = 0;
     let animacaoAtiva = true;
 
     function girar() {
       if (girando && animacaoAtiva) {
-        rotacaoAtual += 0.3; // velocidade lenta
-        totalRotacao += 0.3;
+        rotacaoAtual += 0.6; // giro um pouco mais rápido
+        totalRotacao += 0.6;
         holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
         
-        // Para após uma volta completa (360°)
         if (totalRotacao >= 360) {
           animacaoAtiva = false;
           girando = false;
