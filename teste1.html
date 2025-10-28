@@ -1,84 +1,50 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (Gaze contínuo VR Box)</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <style> body { margin: 0; } </style>
-</head>
-<body>
-<a-scene background="color: #E9F4FF">
-  <a-assets>
-    <a-asset-item id="holoModel" src="./holo.glb"></a-asset-item>
-  </a-assets>
-
-  <a-entity light="type: ambient; intensity: 1.4; color: #FFFFFF"></a-entity>
-
-  <!-- Robô flutuante -->
-  <a-entity id="holo"
-    gltf-model="#holoModel"
-    position="0 1.5 0"
-    rotation="0 -90 0"
-    scale="3 3 3"
-    material="color: #88ccff; opacity: 0.75; transparent: true; emissive: #00ccff; emissiveIntensity: 0.4"
-    animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 1.7 0">
-  </a-entity>
-
-  <a-plane rotation="-90 0 0" width="20" height="20" color="#FFFFFF" opacity="0.05"></a-plane>
-
-  <!-- Câmera fixa + cursor -->
-  <a-entity id="cameraRig" position="0 1.5 3">
-    <a-entity camera look-controls>
-      <a-cursor fuse="true" fuse-timeout="500" material="color: #00ccff; shader: flat" raycaster="objects: #holo"></a-cursor>
-    </a-entity>
-  </a-entity>
-</a-scene>
+<a-entity id="robo"
+  gltf-model="#modeloRobo"
+  position="0 1 -2"
+  scale="1.5 1.5 1.5"
+  rotation="0 180 0">
+</a-entity>
 
 <script>
-const holo = document.querySelector("#holo");
-const cursor = document.querySelector("a-cursor");
+  AFRAME.registerComponent('gira-robo', {
+    init: function () {
+      const robo = this.el;
+      let girando = false;
 
-let rotacionando = false;
-let rotacaoAtual = 0;
-const rotacaoAlvo = 360;
-let ultimoTempo = null;
-let completouVolta = false;
+      // Função de rotação contínua
+      function rotacionar() {
+        if (girando) {
+          let rot = robo.getAttribute('rotation');
+          rot.y += 1;
+          robo.setAttribute('rotation', rot);
+          requestAnimationFrame(rotacionar);
+        }
+      }
 
-// Função para checar a interseção do cursor a cada frame
-function checarGaze() {
-  const intersects = cursor.components.raycaster.intersectedEls;
-  if (!completouVolta) {
-    rotacionando = intersects.includes(holo);
-  }
-  requestAnimationFrame(checarGaze);
-}
+      // Inicia rotação ao olhar
+      robo.addEventListener('mouseenter', () => {
+        girando = true;
+        rotacionar();
+      });
 
-// Rotação baseada em tempo
-function atualizarRotacao(timestamp) {
-  if (!ultimoTempo) ultimoTempo = timestamp;
-  const delta = timestamp - ultimoTempo;
-  ultimoTempo = timestamp;
+      // Para ao sair do olhar
+      robo.addEventListener('mouseleave', () => {
+        girando = false;
+      });
 
-  if (rotacionando && !completouVolta) {
-    const velocidade = 10; // lento
-    rotacaoAtual += velocidade * (delta / 1000);
-
-    if (rotacaoAtual >= rotacaoAlvo) {
-      rotacaoAtual = rotacaoAlvo;
-      rotacionando = false;
-      completouVolta = true;
+      // 👇 Força rotação inicial se o gaze já estiver sobre o robô
+      setTimeout(() => {
+        const camera = document.querySelector('[camera]');
+        if (camera && camera.components.raycaster) {
+          const intersects = camera.components.raycaster.intersectedEls;
+          if (intersects.includes(robo)) {
+            girando = true;
+            rotacionar();
+          }
+        }
+      }, 1000); // espera 1s para garantir que o gaze e o modelo carregaram
     }
+  });
 
-    holo.setAttribute("rotation", { x: 0, y: -90 + rotacaoAtual, z: 0 });
-  }
-
-  requestAnimationFrame(atualizarRotacao);
-}
-
-// Inicia os loops
-requestAnimationFrame(checarGaze);
-requestAnimationFrame(atualizarRotacao);
+  document.querySelector('#robo').setAttribute('gira-robo', '');
 </script>
-</body>
-</html>
-
