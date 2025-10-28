@@ -16,12 +16,12 @@
     <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
     <a-entity light="type: directional; intensity: 0.5; color: #ffffff" position="2 4 1" shadow="cast: false"></a-entity>
 
-    <!-- Robô Holo maior -->
+    <!-- Robô Holo -->
     <a-entity id="holo"
               gltf-model="#holoModel"
               position="0 1.5 -3"
               rotation="0 -90 0"
-              scale="5 5 5"  <!-- Aumento do tamanho -->
+              scale="5 5 5"
               material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
               animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 1.7 -3">
     </a-entity>
@@ -45,7 +45,7 @@
 
     function girar() {
       if (girando && animacaoAtiva) {
-        rotacaoAtual += 2; // giro rápido
+        rotacaoAtual += 2; // giro mais rápido
         totalRotacao += 2;
         holo.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
         
