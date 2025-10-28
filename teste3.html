@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (rotação rápida com gaze)</title>
+  <title>Holo - Robô Educacional (rotação rápida com gaze e fala)</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style>body { margin: 0; }</style>
 </head>
@@ -21,9 +21,13 @@
               gltf-model="#holoModel"
               position="0 1.5 -3"
               rotation="0 -90 0"
-              scale="5 5 5"
+              scale="3 3 3"
               material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
               animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 1.7 -3">
+
+      <!-- Área invisível para olhar na cabeça -->
+      <a-box id="cabeça" position="0 0.7 0" width="0.6" height="0.6" depth="0.6" opacity="0" visible="false"></a-box>
+
     </a-entity>
    
     <!-- Câmera de frente para o robô -->
@@ -38,10 +42,12 @@
 
   <script>
     const holo = document.querySelector("#holo");
+    const cabeca = document.querySelector("#cabeça");
     let girando = false;
     let rotacaoAtual = -90; // posição inicial
     let totalRotacao = 0;
     let animacaoAtiva = true;
+    let jaFalou = false;
 
     function girar() {
       if (girando && animacaoAtiva) {
@@ -58,7 +64,7 @@
       }
     }
 
-    // Inicia ou retoma rotação ao olhar
+    // Rotação com gaze no robô
     holo.addEventListener("mouseenter", () => {
       if (animacaoAtiva) {
         girando = true;
@@ -66,9 +72,23 @@
       }
     });
 
-    // Pausa rotação ao desviar o olhar
     holo.addEventListener("mouseleave", () => {
       girando = false;
+    });
+
+    // Fala ao olhar para a cabeça
+    cabeca.addEventListener("mouseenter", () => {
+      if (jaFalou) return;
+      jaFalou = true;
+
+      const mensagem = new SpeechSynthesisUtterance("Olá! Eu sou Holo! E você?");
+      mensagem.lang = "pt-BR";
+      mensagem.pitch = 1.2;
+      mensagem.rate = 1.0;
+      speechSynthesis.speak(mensagem);
+
+      // Permite nova fala depois de 10 segundos
+      setTimeout(() => jaFalou = false, 10000);
     });
   </script>
 </body>
