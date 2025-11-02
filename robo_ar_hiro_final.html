@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>Robô AR - Hiro</title>
+    <title>Robo AR Hiro</title>
 
     <!-- A-Frame e AR.js -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -18,16 +18,12 @@
     <a-scene embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false;'>
       <a-assets>
         <!-- Modelo 3D do robô -->
-        <a-asset-item id="holoModel" src="3d+robot+model.glb"></a-asset-item>
+        <a-asset-item id="holoModel" src="3d_robot_model.glb"></a-asset-item>
       </a-assets>
 
       <!-- Marcador padrão Hiro -->
       <a-marker preset="hiro">
-        <a-entity
-          id="holoWrapper"
-          position="0 0 0"
-          rotation="0 0 0"
-        >
+        <a-entity id="holoWrapper" position="0 0 0" rotation="0 0 0">
           <a-entity
             id="holo"
             gltf-model="#holoModel"
