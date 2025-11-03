@@ -12,93 +12,37 @@
       body {
         margin: 0;
         overflow: hidden;
-        background-color: black;
-      }
-
-      /* Tela de carregamento */
-      #loading {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: black;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: sans-serif;
-        font-size: 1.5em;
-        z-index: 999;
-        transition: opacity 0.6s ease;
-      }
-
-      /* Fade suave do canvas (não bloqueia renderização da câmera) */
-      a-scene {
-        opacity: 0;
-        transition: opacity 0.8s ease;
-      }
-
-      a-scene.ready {
-        opacity: 1;
       }
     </style>
   </head>
 
   <body>
-    <!-- Tela de espera -->
-    <div id="loading">🔄 Ativando câmera...</div>
-
     <!-- Cena AR -->
-    <a-scene
-      id="scene"
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
-      vr-mode-ui="enabled: false"
-    >
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      <!-- Importa o modelo -->
       <a-assets>
         <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
       </a-assets>
 
-      <!-- Luzes -->
+      <!-- Luzes suaves -->
       <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
       <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="2 4 1"></a-entity>
 
-      <!-- Marcador e modelo -->
+      <!-- Marcador -->
       <a-marker type="pattern" url="marcadorholo.patt">
         <a-entity
           id="holo"
           gltf-model="#holoModel"
           position="0 0 0"
-          rotation="0 90 0"
+          rotation="0 90 0"  <!-- virado de lado direito para a câmera -->
           scale="4.5 4.5 4.5"
           material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
-          animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0"
-        ></a-entity>
+          animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
+        </a-entity>
       </a-marker>
 
+      <!-- Câmera AR -->
       <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-      const scene = document.querySelector('#scene');
-      const loading = document.querySelector('#loading');
-
-      // 1️⃣ Quando a câmera estiver pronta
-      scene.addEventListener('arReady', () => {
-        // Aguarda um pequeno tempo para garantir o vídeo da câmera no fundo
-        setTimeout(() => {
-          scene.classList.add('ready'); // ativa o fade-in
-          loading.style.opacity = '0';
-          setTimeout(() => (loading.style.display = 'none'), 600);
-        }, 400);
-      });
-
-      // 2️⃣ Se houver erro ao ligar a câmera
-      scene.addEventListener('arError', () => {
-        loading.textContent =
-          '❌ Erro ao ativar a câmera. Verifique as permissões e recarregue a página.';
-      });
-    </script>
   </body>
 </html>
