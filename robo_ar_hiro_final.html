@@ -2,11 +2,11 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>Robo AR Hiro</title>
+    <title>Robo AR Hiro - Atualizado</title>
 
     <!-- A-Frame e AR.js -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
       body { margin: 0; overflow: hidden; }
@@ -17,8 +17,8 @@
   <body>
     <a-scene embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false;'>
       <a-assets>
-        <!-- Modelo 3D do robô -->
-        <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
+        <!-- Modelo 3D do robô hospedado no GitHub -->
+        <a-asset-item id="holoModel" src="https://luropa.github.io/sala-vr/robot.glb"></a-asset-item>
       </a-assets>
 
       <!-- Marcador padrão Hiro -->
