@@ -1,48 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <title>Holo - Robô Educacional</title>
+<head>
+  <meta charset="UTF-8">
+  <title>Holo - Robô Educacional</title>
 
-    <!-- A-Frame + AR.js -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <!-- A-Frame + AR.js -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-    </style>
-  </head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
 
-  <body>
-    <!-- Cena AR -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <!-- Importa o modelo -->
-      <a-assets>
-        <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
-      </a-assets>
+<body>
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true;">
+    
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
+    </a-assets>
 
-      <!-- Luzes suaves -->
-      <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
-      <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="2 4 1"></a-entity>
+    <!-- Luzes -->
+    <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
+    <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="2 4 1"></a-entity>
 
-      <!-- Marcador -->
-      <a-marker type="pattern" url="marcadorholo.patt">
-        <a-entity
-          id="holo"
-          gltf-model="#holoModel"
-          position="0 0 0"
-          rotation="0 90 0"  <!-- virado de lado direito para a câmera -->
-          scale="4.5 4.5 4.5"
-          material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
-          animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
-        </a-entity>
-      </a-marker>
+    <!-- Marcador Hiro -->
+    <a-marker preset="hiro" size="1">
+      <a-entity 
+        id="holo"
+        gltf-model="#holoModel"
+        position="0 0 0"
+        rotation="0 90 0"
+        scale="4 4 4"
+        material="opacity: 0.9; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
+        animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
+      </a-entity>
+    </a-marker>
 
-      <!-- Câmera AR -->
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+    <!-- Câmera AR -->
+    <a-entity camera></a-entity>
+  </a-scene>
+</body>
 </html>
