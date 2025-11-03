@@ -30,16 +30,9 @@
 
     <!-- Marcador Hiro -->
     <a-marker preset="hiro" size="1">
-      <a-entity 
-        id="holo"
-        gltf-model="#holoModel"
-        position="0 0 0"
-        rotation="0 90 0"
-        scale="4 4 4"
-        material="opacity: 0.9; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
-        animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
-      </a-entity>
+        <a-box color="red" depth="0.5" height="0.5" width="0.5" position="0 0.25 0"></a-box>
     </a-marker>
+
 
     <!-- Câmera AR -->
     <a-entity camera></a-entity>
