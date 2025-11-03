@@ -30,11 +30,18 @@
         font-family: sans-serif;
         font-size: 1.5em;
         z-index: 999;
+        transition: opacity 0.6s ease;
       }
 
-      /* Garante que nada da cena apareça antes da hora */
-      a-scene {
-        visibility: hidden;
+      /* Começa invisível, mas ainda renderiza (necessário para a câmera) */
+      #scene {
+        opacity: 0;
+        transition: opacity 0.8s ease;
+      }
+
+      /* Após ativação, aparecerá suavemente */
+      #scene.visible {
+        opacity: 1;
       }
     </style>
   </head>
@@ -50,7 +57,6 @@
       arjs="sourceType: webcam; debugUIEnabled: false;"
       vr-mode-ui="enabled: false"
     >
-      <!-- Importa o modelo -->
       <a-assets>
         <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
       </a-assets>
@@ -72,7 +78,6 @@
         ></a-entity>
       </a-marker>
 
-      <!-- Câmera AR -->
       <a-entity camera></a-entity>
     </a-scene>
 
@@ -80,18 +85,16 @@
       const scene = document.querySelector('#scene');
       const loading = document.querySelector('#loading');
 
-      // 1️⃣ Quando o A-Frame terminar de montar a cena
-      scene.addEventListener('loaded', () => {
-        scene.style.visibility = 'hidden'; // ainda escondido
-      });
-
-      // 2️⃣ Quando o AR.js estiver pronto e a câmera ativa
+      // Quando a câmera AR estiver pronta
       scene.addEventListener('arReady', () => {
-        loading.style.display = 'none';
-        scene.style.visibility = 'visible'; // mostra a cena já renderizada
+        loading.style.opacity = '0'; // esmaece o texto de carregamento
+        setTimeout(() => {
+          loading.style.display = 'none';
+          scene.classList.add('visible'); // mostra a cena com fade
+        }, 600);
       });
 
-      // 3️⃣ Se ocorrer erro
+      // Se ocorrer erro na câmera
       scene.addEventListener('arError', () => {
         loading.textContent = '❌ Erro ao ativar a câmera. Verifique as permissões.';
       });
