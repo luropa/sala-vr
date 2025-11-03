@@ -9,28 +9,27 @@
 <body>
   <a-scene background="color: #E8F0FF">
     <a-assets>
-      <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
+      <!-- Caminho corrigido para o modelo GLB -->
+      <a-asset-item id="holoModel" src="https://github.com/luropa/sala-vr/raw/main/robot.glb"></a-asset-item>
     </a-assets>
 
     <!-- Luzes -->
     <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
     <a-entity light="type: directional; intensity: 0.5; color: #ffffff" position="2 4 1" shadow="cast: false"></a-entity>
 
-    <!-- WRAPPER: posição do pivô central da rotação -->
-    <!-- coloque o wrapper exatamente onde você quer o centro da rotação (aqui: 0, 1.5, -3) -->
+    <!-- WRAPPER (centro da rotação) -->
     <a-entity id="holoWrapper" position="0 1.5 -3" rotation="0 0 0">
-      <!-- Modelo dentro do wrapper; ajuste o offset se o mesh estiver deslocado internamente -->
       <a-entity id="holo"
-          gltf-model="#holoModel"
-          position="0 0 0"
-          rotation="0 0 0"
-          scale="4.5 4.5 4.5"
-          material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
-          animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
+        gltf-model="#holoModel"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="4.5 4.5 4.5"
+        material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
+        animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
       </a-entity>
-  </a-entity>
-   
-    <!-- Câmera próxima e de frente (posicionada em z > wrapper.z) -->
+    </a-entity>
+
+    <!-- Câmera -->
     <a-entity id="camera" camera look-controls position="0 1.6 1.2" look-at="#holoWrapper">
       <a-cursor 
         fuse="true" 
@@ -41,21 +40,19 @@
   </a-scene>
 
   <script>
-    // Agora giramos o WRAPPER, não o mesh diretamente
     const wrapper = document.querySelector("#holoWrapper");
     let girando = false;
-    let rotacaoAtual = 0; // começar com frente do wrapper voltada para a câmera
+    let rotacaoAtual = 0;
     let totalRotacao = 0;
     let animacaoAtiva = true;
 
     function girar() {
       if (girando && animacaoAtiva) {
-        const velocidade = 8; // ajuste aqui: quanto maior, mais rápido
+        const velocidade = 8;
         rotacaoAtual += velocidade;
         totalRotacao += Math.abs(velocidade);
         wrapper.setAttribute("rotation", { x: 0, y: rotacaoAtual, z: 0 });
 
-        // se quiser limitar a apenas 360°, mantenha isto; caso queira rotação contínua remova este bloco
         if (totalRotacao >= 360) {
           animacaoAtiva = false;
           girando = false;
@@ -65,8 +62,6 @@
       }
     }
 
-    // Inicia rotação ao olhar (mouseenter no mesh)
-    // Use wrapper para eventos se preferir: wrapper.addEventListener(...)
     const holo = document.querySelector("#holo");
     holo.addEventListener("mouseenter", () => {
       if (animacaoAtiva) {
