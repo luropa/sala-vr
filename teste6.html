@@ -29,17 +29,13 @@
       <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="2 4 1"></a-entity>
 
       <!-- Marcador -->
-      <a-marker type="pattern" url="marcadorholo1.patt" size='1'>
-        <a-entity
-          id="holo"
-          gltf-model="#holoModel"
-          position="0 0 0"
-          rotation="0 90 0"  <!-- virado de lado direito para a câmera -->
-          scale="4.5 4.5 4.5"
-          material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
-          animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
-        </a-entity>
+      <a-marker preset="hiro">
+  <a-entity gltf-model="#holoModel" scale="4 4 4" rotation="0 90 0"></a-entity>
+</a-marker>
       </a-marker>
+<a-marker preset="hiro">
+  <a-entity gltf-model="#holoModel" scale="4 4 4" rotation="0 90 0"></a-entity>
+</a-marker>
 
       <!-- Câmera AR -->
       <a-entity camera></a-entity>
