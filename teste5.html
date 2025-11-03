@@ -1,39 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <title>Holo - Robô Educacional (AR)</title>
+  <meta charset="UTF-8">
+  <title>Holo - Robô Educacional</title>
 
   <!-- A-Frame + AR.js -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
   <style>
-    html, body { height: 100%; margin: 0; }
-    body { overflow: hidden; }
-    /* Mensagem de fallback visível se a câmera não for permitida */
-    #msg {
-      position: fixed;
-      left: 12px;
-      bottom: 12px;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-family: sans-serif;
-      font-size: 13px;
-      display: none;
-      z-index: 9999;
-    }
+    body { margin: 0; overflow: hidden; }
   </style>
 </head>
-<body>
-  <div id="msg">Ative a câmera e recarregue a página para ver o AR.</div>
 
-  <!-- Cena AR.js (embedded para ocupar a tela) -->
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+<body>
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true;">
+
+    <!-- Assets -->
     <a-assets>
-      <!-- garanta que robot.glb esteja no mesmo diretório -->
+      <!-- Coloque o seu robot.glb na mesma pasta deste HTML -->
       <a-asset-item id="holoModel" src="robot.glb"></a-asset-item>
     </a-assets>
 
@@ -41,15 +26,13 @@
     <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
     <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="2 4 1"></a-entity>
 
-    <!-- Marcador (garanta que marcadorholo.patt esteja no mesmo diretório) -->
-    <a-marker type="pattern" url="marcadorholo.patt">
+    <!-- Marcador Hiro -->
+    <a-marker preset="hiro" size="1">
       <a-entity
-        id="holo"
         gltf-model="#holoModel"
+        scale="0.5 0.5 0.5"
+        rotation="0 90 0"
         position="0 0 0"
-        rotation="0 -90 0"   <!-- ajustado para ficar de frente -->
-        scale="4.5 4.5 4.5"
-        material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
         animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
       </a-entity>
     </a-marker>
@@ -57,19 +40,5 @@
     <!-- Câmera AR -->
     <a-entity camera></a-entity>
   </a-scene>
-
-  <script>
-    // Mostra mensagem se a câmera for negada
-    navigator.mediaDevices && navigator.mediaDevices.getUserMedia
-      ? navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-          // usuário permitiu; pare o stream (AR.js vai gerenciar a câmera)
-          stream.getTracks().forEach(t => t.stop());
-        }).catch(err => {
-          // se negou, mostra msg
-          console.warn('Webcam error:', err);
-          document.getElementById('msg').style.display = 'block';
-        })
-      : document.getElementById('msg').style.display = 'block';
-  </script>
 </body>
 </html>
