@@ -15,6 +15,7 @@
         background-color: black;
       }
 
+      /* Tela de carregamento */
       #loading {
         position: fixed;
         top: 0;
@@ -31,8 +32,9 @@
         z-index: 999;
       }
 
+      /* Garante que nada da cena apareça antes da hora */
       a-scene {
-        display: none; /* só aparece após a câmera estar pronta */
+        visibility: hidden;
       }
     </style>
   </head>
@@ -67,8 +69,7 @@
           scale="4.5 4.5 4.5"
           material="color: #66ccff; opacity: 0.75; transparent: true; emissive: #00aaff; emissiveIntensity: 0.3"
           animation__float="property: position; dir: alternate; dur: 4000; easing: easeInOutSine; loop: true; to: 0 0.2 0"
-        >
-        </a-entity>
+        ></a-entity>
       </a-marker>
 
       <!-- Câmera AR -->
@@ -79,14 +80,19 @@
       const scene = document.querySelector('#scene');
       const loading = document.querySelector('#loading');
 
-      // Quando o AR.js estiver pronto
-      scene.addEventListener('arReady', function () {
-        loading.style.display = 'none'; // remove a tela de espera
-        scene.style.display = 'block'; // mostra a cena AR
+      // 1️⃣ Quando o A-Frame terminar de montar a cena
+      scene.addEventListener('loaded', () => {
+        scene.style.visibility = 'hidden'; // ainda escondido
       });
 
-      // Se ocorrer erro na inicialização
-      scene.addEventListener('arError', function () {
+      // 2️⃣ Quando o AR.js estiver pronto e a câmera ativa
+      scene.addEventListener('arReady', () => {
+        loading.style.display = 'none';
+        scene.style.visibility = 'visible'; // mostra a cena já renderizada
+      });
+
+      // 3️⃣ Se ocorrer erro
+      scene.addEventListener('arError', () => {
         loading.textContent = '❌ Erro ao ativar a câmera. Verifique as permissões.';
       });
     </script>
