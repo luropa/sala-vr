@@ -5,85 +5,123 @@
   <title>Sala 360A</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
+
 <body>
-  <a-scene>
-    <a-assets>
-      <a-asset-item id="Holo" src="robot.glb"></a-asset-item>
-      <img id="img-ninho" src="palavraninho.png" />
-      <img id="img-estrela" src="estrelacontente.png" />
-      <img id="img-estrela-triste" src="estrelatriste.png" />
-      <img id="velha" src="jvelha.jpg" /> 
-      <img id="jogo" src="brinquedo educativo2.png" />
-      <img id="img-climbing" src="parededeescalada1.png" />
-      <img id="img-maoesquerda" src="maoesquerda.png" /> 
-      <img id="img-maodireita" src="maodireita.png" /> 
-    </a-assets>
+<a-scene>
 
-    <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
+  <!-- ================= ASSETS ================= -->
+  <a-assets>
+    <a-asset-item id="holoModel" src="3d+robot+model.glb"></a-asset-item>
 
-    <!-- Piso e paredes -->
-    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" material="shader: flat;"></a-plane>
-    <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 -5" material="src: paredeerodape2.png"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png"></a-plane>
-    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png"></a-plane>
-    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png"></a-plane>
+    <img id="img-ninho" src="palavraninho.png" />
+    <img id="img-estrela" src="estrelacontente.png" />
+    <img id="img-estrela-triste" src="estrelatriste.png" />
+    <img id="velha" src="jvelha.jpg" />
+    <img id="jogo" src="brinquedo educativo2.png" />
+    <img id="img-climbing" src="parededeescalada1.png" />
+    <img id="img-maoesquerda" src="maoesquerda.png" />
+    <img id="img-maodireita" src="maodireita.png" />
+  </a-assets>
 
-    <a-image src="porta.png" width="2" height="4" position="0 2 4.99" rotation="0 180 0"></a-image>
-    <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
+  <!-- ================= LUZES ================= -->
+  <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
+  <a-entity light="type: directional; intensity: 0.5; color: #ffffff"
+            position="2 4 1"></a-entity>
 
-    <!-- Lousa -->
-    <a-image id="lousa" interacao-lousa src="lousaembranco2.png"
-             width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
+  <!-- ================= SALA ================= -->
+  <a-plane src="piso1.png" width="10" height="10"
+           rotation="-90 0 0"></a-plane>
 
-    <a-image id="cordao" src="cordao-alfabeto2.png"
-             width="5.6" height="1.1" position="0 4.2 -4.94"></a-image>
+  <a-plane width="10" height="5" position="0 2.5 -5"
+           material="src: paredeerodape2.png"></a-plane>
 
-    <a-image id="imagem-ninho" src="#img-ninho"
-             width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
+  <a-plane width="10" height="5" position="0 2.5 5"
+           rotation="0 180 0"
+           material="src: paredeerodape2.png"></a-plane>
 
-    <a-text id="texto-digitado" value=""
-            position="0 2.5 -4.9" color="#000"
-            align="center" width="3" visible="false"></a-text>
+  <a-plane width="10" height="5" position="-5 2.5 0"
+           rotation="0 90 0"
+           material="src: paredeerodape2.png"></a-plane>
 
-    <a-entity id="teclado" visible="false"></a-entity>
+  <a-plane width="10" height="5" position="5 2.5 0"
+           rotation="0 -90 0"
+           material="src: paredeerodape2.png"></a-plane>
 
-    <!-- 🔹 ROBÔ FLUTUANDO NO CENTRO DA SALA -->
-    <a-entity
-      id="robo-assistente"
-      gltf-model="#Holo"
-      position="0 0.3 0"
-      rotation="0 0 0"
-      scale="0.6 0.6 0.6"
+  <!-- ================= ROBÔ (WRAPPER) ================= -->
+
+  <!-- Wrapper = posição fixa no centro da sala -->
+  <a-entity id="holoWrapper" position="0 1.2 0">
+
+    <!-- Robô -->
+    <a-entity id="holo"
+      gltf-model="#holoModel"
+      scale="4.5 4.5 4.5"
+      material="opacity: 0.8; transparent: true;
+                emissive: #00aaff; emissiveIntensity: 0.3"
       animation__float="property: position;
                         dir: alternate;
-                        dur: 3000;
+                        dur: 4000;
+                        easing: easeInOutSine;
                         loop: true;
-                        to: 0 0.6 0;
-                        easing: easeInOutSine">
+                        to: 0 0.25 0">
     </a-entity>
 
-    <!-- Tapetes e objetos -->
-    <a-image src="tapete.png" width="5" height="7" rotation="-90 0 0" position="-3 0.01 0.9"></a-image>
-    <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
+  </a-entity>
 
-    <!-- Pegadas -->
-    <a-image id="pegadas1" src="pegadas.png" width="0.8" height="0.8"
-             rotation="-90 0 0" position="0 0.01 -2" teletransporte></a-image>
+  <!-- ================= CÂMERA ================= -->
+  <a-entity id="cameraRig" position="0 0.5 4">
+    <a-camera look-controls wasd-controls-enabled="true">
+      <a-cursor fuse="true" fuse-timeout="2000"
+        geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+        material="color: red; shader: flat">
+      </a-cursor>
+    </a-camera>
+  </a-entity>
 
-    <a-image id="pegadas2" src="pegadas.png" width="0.8" height="0.8"
-             rotation="-90 -90 0" position="3 0.02 0" teletransporte></a-image>
+</a-scene>
 
-    <!-- Câmera -->
-    <a-entity id="cameraRig" position="0 0.5 4">
-      <a-camera look-controls wasd-controls-enabled="true">
-        <a-cursor fuse="true" fuse-timeout="2000"
-                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-                  material="color: red; shader: flat"
-                  position="0 0 -1"></a-cursor>
-      </a-camera>
-    </a-entity>
+<!-- ================= SCRIPT DO ROBÔ ================= -->
+<script>
+  const wrapper = document.querySelector("#holoWrapper");
+  const holo = document.querySelector("#holo");
 
-  </a-scene>
+  let girando = false;
+  let rotacaoAtual = 0;
+  let totalRotacao = 0;
+  let animacaoAtiva = true;
+
+  function girar() {
+    if (girando && animacaoAtiva) {
+      const velocidade = 4;
+      rotacaoAtual += velocidade;
+      totalRotacao += Math.abs(velocidade);
+
+      wrapper.setAttribute("rotation", {
+        x: 0,
+        y: rotacaoAtual,
+        z: 0
+      });
+
+      if (totalRotacao >= 360) {
+        animacaoAtiva = false;
+        girando = false;
+        return;
+      }
+      requestAnimationFrame(girar);
+    }
+  }
+
+  holo.addEventListener("mouseenter", () => {
+    if (animacaoAtiva) {
+      girando = true;
+      girar();
+    }
+  });
+
+  holo.addEventListener("mouseleave", () => {
+    girando = false;
+  });
+</script>
+
 </body>
 </html>
