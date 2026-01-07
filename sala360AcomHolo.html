@@ -5,154 +5,93 @@
   <title>Sala 360A</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
-
 <body>
-<a-scene>
+  <a-scene>
+    <a-assets>
+      <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
 
-  <!-- ================= ASSETS ================= -->
-  <a-assets>
-    <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
-    <a-asset-item id="modeloRobo" src="3d+robot+model.glb"></a-asset-item>
+      <!-- ROBÔ -->
+      <a-asset-item id="modeloRobo" src="3d+robot+model.glb"></a-asset-item>
 
-    <img id="img-ninho" src="palavraninho.png">
-    <img id="img-estrela" src="estrelacontente.png">
-    <img id="img-estrela-triste" src="estrelatriste.png">
+      <img id="img-ninho" src="palavraninho.png" />
+      <img id="img-estrela" src="estrelacontente.png" />
+      <img id="img-estrela-triste" src="estrelatriste.png" />
+      <img id="velha" src="jvelha.jpg" /> 
+      <img id="jogo" src="brinquedo educativo2.png" />
+      <img id="img-climbing" src="parededeescalada1.png" />
+      <img id="img-maoesquerda" src="maoesquerda.png" /> 
+      <img id="img-maodireita" src="maodireita.png" /> 
+    </a-assets>
 
-    <img id="velha" src="jvelha.jpg">
-    <img id="jogo" src="brinquedo_educativo2.png">
-    <img id="jogoPedagogico" src="jogo_pedagogico.png">
+    <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
 
-    <img id="img-climbing" src="parededeescalada1.png">
-    <img id="img-maoesquerda" src="maoesquerda.png">
-    <img id="img-maodireita" src="maodireita.png">
+    <!-- Piso e paredes -->
+    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" class="piso" material="shader: flat;"></a-plane>
+    <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
+    <a-plane width="10" height="5" position="0 2.5 -5" rotation="0 0 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
+    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png; side: front;"></a-plane>
 
-    <img id="pegadas" src="pegadas.png">
-    <img id="twister" src="roleta_twister.png">
-  </a-assets>
+    <a-image src="porta.png" width="2" height="4" position="0 2 4.99" rotation="0 180 0"></a-image>
+    <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
 
-  <!-- ================= LUZ ================= -->
-  <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
+    <!-- Lousa e cordão alfabeto -->
+    <a-image id="lousa" interacao-lousa src="lousaembranco2.png" width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
+    <a-image id="cordao" src="cordao-alfabeto2.png" width="5.6" height="1.1" position="0 4.2 -4.94"></a-image>
 
-  <!-- ================= PISO E TETO ================= -->
-  <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0"></a-plane>
-  <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
+    <a-image id="imagem-ninho" src="#img-ninho" width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
+    <a-text id="texto-digitado" value="" position="0 2.5 -4.9" color="#000" align="center" width="3" visible="false"></a-text>
+    <a-entity id="teclado" visible="false"></a-entity>
 
-  <!-- ================= PAREDES ================= -->
-  <a-plane width="10" height="5" position="0 2.5 -5" material="src: paredeerodape2.png"></a-plane>
-  <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png"></a-plane>
-  <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png"></a-plane>
-  <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png"></a-plane>
+    <!-- Tapetes e pegadas -->
+    <a-image src="tapete.png" width="5" height="7" rotation="-90 0 0" position="-3 0.01 0.9"></a-image>
+    <a-image src="ponteirotwister.png" width="0.9" height="0.9" rotation="-90 0 0" position="-1.2 0.02 1.9"></a-image>
+    <a-image src="tatame2.png" width="8" height="4" rotation="90 0 90" position="3 0.01 -0.03"></a-image>
+    <a-image src="quebra-cabeca.png" width="1.4" height="1.8" rotation="-90 10 0" position="1.55 0.02 2"></a-image>
+    <a-image src="janela2.png" width="5.5" height="5.5" position="-4.95 2.5 0" rotation="0 90 0"></a-image>
 
-  <!-- ================= PORTA E DECORAÇÕES ================= -->
-  <a-image src="porta.png" width="2" height="4" position="0 2 4.99" rotation="0 180 0"></a-image>
-  <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
+    <!-- Jogo da velha e brinquedo educativo -->
+    <a-image id="jogoVelha" src="#velha" width="1.5" height="1.5" position="-4.95 1.8 3.5" rotation="0 90 0"></a-image>
+    <a-image id="brinquedoEducativo" src="#jogo" width="1.5" height="1.5" position="-2.8 1.8 4.95" rotation="0 180 0"></a-image>
 
-  <!-- ================= JANELA ================= -->
-  <a-image src="janela2.png" width="5.5" height="5.5"
-           position="-4.95 2.5 0" rotation="0 90 0"></a-image>
+    <a-image src="interruptor-branco.png" width="0.3" height="0.3" position="-1.5 2 4.94" rotation="0 180 0"></a-image>
+    <a-image src="relogio2.png" width="0.8" height="0.8" position="3.5 2.5 -4.95"></a-image>
+    <a-image src="nuvem2.png" width="2" height="1.7" position="3.5 3.5 -4.95"></a-image>
+    <a-image src="nuvem2.png" width="2" height="1.7" position="-3.5 3.5 -4.95"></a-image>
+    <a-image src="nuvem2.png" width="2" height="1.7" position="3 4.5 -4.93"></a-image>
+    <a-image src="nuvem2.png" width="2" height="1.7" position="-3 4.5 -4.93"></a-image>
 
-  <!-- ================= LOUSA ================= -->
-  <a-image id="lousa" src="lousaembranco2.png"
-           width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
+    <a-entity id="cadeira" gltf-model="#modeloCadeira" position="3 0 -3" scale="0.8 0.8 0.8" teletransporte></a-entity>
 
-  <a-image src="cordao-alfabeto2.png"
-           width="5.6" height="1.1" position="0 4.2 -4.94"></a-image>
+    <!-- ROBÔ NO CENTRO DA SALA -->
+    <a-entity id="robo"
+              gltf-model="#modeloRobo"
+              position="0 1.4 0"
+              scale="0.6 0.6 0.6"
+              rotation="0 180 0">
+    </a-entity>
 
-  <!-- ================= TAPETES E TATAME ================= -->
-  <a-image src="tapete.png"
-           width="5" height="7"
-           rotation="-90 0 0"
-           position="-3 0.01 0.9"></a-image>
+    <!-- Pegadas com teletransporte suave -->
+    <a-image id="pegadas1" src="pegadas.png" width="0.8" height="0.8" rotation="-90 0 0" position="0 0.01 -2" teletransporte></a-image>
+    <a-image id="pegadas2" src="pegadas.png" width="0.8" height="0.8" rotation="-90 -90 0" position="3 0.02 0" teletransporte></a-image>
+    <a-image id="pegadas4" src="pegadas.png" width="0.8" height="0.8" rotation="-90 130 5" position="-3.8 0.05 3.8" teletransporte></a-image>
 
-  <a-image src="tatame2.png"
-           width="8" height="4"
-           rotation="90 0 90"
-           position="3 0.01 0"></a-image>
+    <!-- Parede de escalada -->
+    <a-image id="climbingWall" src="#img-climbing" width="8" height="5" position="4.97 2.5 0" rotation="0 -90 0"></a-image>
+    <a-image id="maoesquerda" src="#img-maoesquerda" width="0.3" height="0.4" position="4.95 3 -0.2" rotation="0 -90 0"></a-image>
+    <a-image id="maodireita" src="#img-maodireita" width="0.3" height="0.4" position="4.95 2.45 0.44" rotation="0 -90 0"></a-image>
 
-  <!-- ================= PEGADAS NO CHÃO ================= -->
-  <a-image src="#pegadas"
-           width="1" height="2"
-           rotation="-90 0 0"
-           position="-1 0.02 1.5"></a-image>
+    <!-- Câmera -->
+    <a-entity id="cameraRig" position="0 0.5 4">
+      <a-camera look-controls wasd-controls-enabled="true">
+        <a-cursor fuse="true" fuse-timeout="2000" color="red"
+                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+                  material="color: red; shader: flat"
+                  position="0 0 -1"></a-cursor>
+      </a-camera>
+    </a-entity>
 
-  <a-image src="#pegadas"
-           width="1" height="2"
-           rotation="-90 20 0"
-           position="-0.5 0.02 0.8"></a-image>
-
-  <a-image src="#pegadas"
-           width="1" height="2"
-           rotation="-90 -20 0"
-           position="0 0.02 0.1"></a-image>
-
-  <!-- ================= JOGOS NA PAREDE ================= -->
-  <a-image id="jogoVelha"
-           src="#velha"
-           width="1.5" height="1.5"
-           position="-4.95 1.8 3.5"
-           rotation="0 90 0"></a-image>
-
-  <a-image id="brinquedoEducativo"
-           src="#jogo"
-           width="1.5" height="1.5"
-           position="-2.8 1.8 4.95"
-           rotation="0 180 0"></a-image>
-
-  <a-image id="jogoPedagogicoPainel"
-           src="#jogoPedagogico"
-           width="1.6" height="1.6"
-           position="2.8 1.8 4.95"
-           rotation="0 180 0"></a-image>
-
-  <!-- ================= ROLET A DO TWISTER ================= -->
-  <a-image src="#twister"
-           width="1.8" height="1.8"
-           position="3.8 1.8 4.95"
-           rotation="0 180 0"></a-image>
-
-  <!-- ================= PAREDE DE ESCALADA ================= -->
-  <a-image src="#img-climbing"
-           width="8" height="5"
-           position="4.97 2.5 0"
-           rotation="0 -90 0"></a-image>
-
-  <a-image src="#img-maoesquerda"
-           width="0.3" height="0.4"
-           position="4.95 3 -0.2"
-           rotation="0 -90 0"></a-image>
-
-  <a-image src="#img-maodireita"
-           width="0.3" height="0.4"
-           position="4.95 2.45 0.44"
-           rotation="0 -90 0"></a-image>
-
-  <!-- ================= CADEIRA ================= -->
-  <a-entity gltf-model="#modeloCadeira"
-            position="3 0 -3"
-            scale="0.8 0.8 0.8"></a-entity>
-
-  <!-- ================= ROBÔ (CENTRO DA SALA) ================= -->
-  <a-entity id="robo"
-            gltf-model="#modeloRobo"
-            position="0 1.6 0"
-            scale="0.8 0.8 0.8"
-            animation="property: position;
-                       dir: alternate;
-                       dur: 3500;
-                       easing: easeInOutSine;
-                       loop: true;
-                       to: 0 1.9 0"></a-entity>
-
-  <!-- ================= CÂMERA ================= -->
-  <a-entity id="cameraRig" position="0 0.5 4">
-    <a-camera look-controls wasd-controls-enabled="true">
-      <a-cursor fuse="true"
-                fuse-timeout="2000"
-                geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-                material="color: red; shader: flat"></a-cursor>
-    </a-camera>
-  </a-entity>
-
-</a-scene>
+  </a-scene>
 </body>
 </html>
