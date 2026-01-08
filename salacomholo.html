@@ -65,12 +65,12 @@
     <a-entity
   id="roboWrapper"
   position="-2.2 2.0 2.5"
-  rotation="0 180 0">
+  rotation="0 90 0">   <!-- gira o robô para +Z -->
 
   <a-entity
     id="roboEducacional"
     gltf-model="#modeloRobo"
-    rotation="0 90 0"
+    rotation="0 0 0"   <!-- offset corrigido -->
     scale="1.5 1.5 1.5"
     animation="property: position;
                dir: alternate;
@@ -79,6 +79,9 @@
                loop: true;
                to: 0 0.3 0">
   </a-entity>
+
+</a-entity>
+
 
 </a-entity>
 
