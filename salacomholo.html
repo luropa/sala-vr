@@ -1,331 +1,161 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <title>Sala 360A</title>
+  <meta charset="utf-8">
+  <title>Sala 360A com Robô</title>
+
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- ================= COMPONENTE DA LOUSA ================= -->
+  <script>
+    AFRAME.registerComponent('interacao-lousa', {
+      init: function () {
+        const lousa = this.el;
+        const teclado = document.querySelector('#teclado');
+        const palavra = document.querySelector('#palavraNinho');
+
+        lousa.addEventListener('mouseenter', () => {
+          teclado.setAttribute('visible', true);
+          palavra.setAttribute('visible', true);
+        });
+      }
+    });
+  </script>
+
 </head>
+
 <body>
-  <a-scene>
-    <a-assets>
-      <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
 
-      <!-- ROBÔ -->
-      <a-asset-item id="modeloRobo" src="robo.glb"></a-asset-item>
+<a-scene>
 
-      <img id="img-ninho" src="palavraninho.png" />
-      <img id="img-estrela" src="estrelacontente.png" />
-      <img id="img-estrela-triste" src="estrelatriste.png" />
-      <img id="velha" src="jvelha.jpg" /> 
-      <img id="jogo" src="brinquedo educativo2.png" />
-      <img id="img-climbing" src="parededeescalada1.png" />
-      <img id="img-maoesquerda" src="maoesquerda.png" /> 
-      <img id="img-maodireita" src="maodireita.png" /> 
-    </a-assets>
+  <!-- ================= ASSETS ================= -->
+  <a-assets>
+    <img id="estrelaFeliz" src="estrelafeliz.png">
+    <img id="estrelaTriste" src="estrelatriste.png">
+    <a-asset-item id="modeloRobo" src="robo.glb"></a-asset-item>
+  </a-assets>
 
-    <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
+  <!-- ================= CAMERA / GAZE ================= -->
+  <a-entity id="cameraRig">
+    <a-camera>
+      <a-cursor
+        fuse="true"
+        fuse-timeout="1500"
+        raycaster="objects: .interativo"
+        geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
+        material="color: black; shader: flat">
+      </a-cursor>
+    </a-camera>
+  </a-entity>
 
-    <!-- Piso e paredes -->
-    <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0" material="shader: flat;"></a-plane>
-    <a-plane color="#a9c9dd" width="10" height="10" position="0 5 0" rotation="90 0 0"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 -5" material="src: paredeerodape2.png;"></a-plane>
-    <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0" material="src: paredeerodape2.png;"></a-plane>
-    <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png;"></a-plane>
-    <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0" material="src: paredeerodape2.png;"></a-plane>
+  <!-- ================= LOUSA ================= -->
+  <a-image
+    id="lousa"
+    class="interativo"
+    src="lousaembranco2.png"
+    position="0 2 -4"
+    width="3"
+    height="2"
+    interacao-lousa>
+  </a-image>
 
-    <a-image src="porta.png" width="2" height="4" position="0 2 4.99" rotation="0 180 0"></a-image>
-    <a-image src="sol.png" width="2" height="2" position="0 4.95 0" rotation="-90 0 180"></a-image>
+  <a-image
+    id="palavraNinho"
+    src="ninho.png"
+    position="0 3 -3.9"
+    visible="false"
+    width="1.5"
+    height="0.5">
+  </a-image>
 
-    <!-- Lousa -->
-    <a-image id="lousa" interacao-lousa src="lousaembranco2.png"
-      width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
+  <!-- ================= TECLADO ================= -->
+  <a-entity
+    id="teclado"
+    position="0 1.2 -3.8"
+    visible="false">
+    <!-- teclas aqui -->
+  </a-entity>
 
-    <a-image id="cordao" src="cordao-alfabeto2.png"
-      width="5.6" height="1.1" position="0 4.2 -4.94"></a-image>
+  <!-- ================= FEEDBACK ================= -->
+  <a-image
+    id="estrelaPositiva"
+    src="#estrelaFeliz"
+    position="0 2.5 -3"
+    visible="false">
+  </a-image>
 
-    <a-image id="imagem-ninho" src="#img-ninho"
-      width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
+  <a-image
+    id="estrelaNegativa"
+    src="#estrelaTriste"
+    position="0 2.5 -3"
+    visible="false">
+  </a-image>
 
-    <a-text id="texto-digitado" position="0 2.5 -4.9"
-      color="#000" align="center" width="3" visible="false"></a-text>
+  <!-- ================= PAREDE DE ESCALADA ================= -->
+  <a-plane
+    id="paredeEscalada"
+    position="3 2 -2"
+    rotation="0 -90 0"
+    width="4"
+    height="4"
+    color="#ccc">
+  </a-plane>
 
-    <a-entity id="teclado" visible="false"></a-entity>
+  <a-image
+    id="pegadas2"
+    class="interativo"
+    src="pegadas.png"
+    position="2.9 1.5 -2">
+  </a-image>
 
-    <!-- Cadeira -->
-    <a-entity gltf-model="#modeloCadeira"
-      position="3 0 -3" scale="0.8 0.8 0.8" teletransporte></a-entity>
+  <!-- ================= ROBÔ ================= -->
+  <a-entity
+    id="roboWrapper"
+    position="-1.6 2.0 2.9"
+    rotation="0 90 0">
 
-    <!-- ROBÔ EDUCACIONAL -->
     <a-entity
       id="roboEducacional"
       gltf-model="#modeloRobo"
-      position="-1.5 0 -3.5"
-      rotation="0 180 0"
-      scale="1.4 1.4 1.4"
+      rotation="0 0 0"
+      scale="1.5 1.5 1.5"
       animation="property: position;
                  dir: alternate;
                  dur: 4000;
                  easing: easeInOutSine;
                  loop: true;
-                 to: -1.5 0.3 -3.5">
+                 to: 0 0.3 0">
     </a-entity>
 
-    <!-- Pegadas -->
-    <a-image id="pegadas1" src="pegadas.png" width="0.8" height="0.8"
-      rotation="-90 0 0" position="0 0.01 -2" teletransporte></a-image>
+  </a-entity>
 
-    <a-image id="pegadas2" src="pegadas.png" width="0.8" height="0.8"
-      rotation="-90 -90 0" position="3 0.02 0" teletransporte></a-image>
+</a-scene>
 
-    <a-image id="pegadas4" src="pegadas.png" width="0.8" height="0.8"
-      rotation="-90 130 5" position="-3.8 0.05 3.8" teletransporte></a-image>
+<!-- ================= SCRIPT PRINCIPAL ================= -->
+<script>
+window.addEventListener('load', () => {
 
-    <!-- Parede escalada -->
-    <a-image id="climbingWall" src="#img-climbing"
-      width="8" height="5" position="4.97 2.5 0" rotation="0 -90 0"></a-image>
+  const estrelaBoa = document.querySelector('#estrelaPositiva');
+  const estrelaRuim = document.querySelector('#estrelaNegativa');
+  const pegadas = document.querySelector('#pegadas2');
+  const cameraRig = document.querySelector('#cameraRig');
 
-    <a-image id="maoesquerda" src="#img-maoesquerda"
-      width="0.3" height="0.4" position="4.95 3 -0.2" rotation="0 -90 0"></a-image>
+  pegadas.addEventListener('mouseenter', () => {
+    cameraRig.setAttribute('position', '2.5 1.6 -2');
+  });
 
-    <a-image id="maodireita" src="#img-maodireita"
-      width="0.3" height="0.4" position="4.95 2.45 0.44" rotation="0 -90 0"></a-image>
+  function feedbackCorreto() {
+    estrelaBoa.setAttribute('visible', true);
+    setTimeout(() => estrelaBoa.setAttribute('visible', false), 2000);
+  }
 
-    <!-- CÂMERA -->
-    <a-entity id="cameraRig" position="0 0.5 4">
-      <a-camera look-controls wasd-controls-enabled="true">
-        <a-cursor fuse="true" fuse-timeout="2000"
-          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-          material="color: red; shader: flat"
-          position="0 0 -1">
-        </a-cursor>
-      </a-camera>
-    </a-entity>
-  </a-scene>
+  function feedbackErrado() {
+    estrelaRuim.setAttribute('visible', true);
+    setTimeout(() => estrelaRuim.setAttribute('visible', false), 2000);
+  }
 
-  <script>
-    // --- Teletransporte suave e pegadas ---
-    let emAnimacao = false;
-    const cameraRig = document.querySelector('#cameraRig');
-    const maodireita = document.querySelector('#maodireita');
-    const pegadasParede = document.querySelector('#pegadas2');
-    const pegadasLousa = document.querySelector('#pegadas1'); // pegada para a lousa
-    const outrasPegadas = document.querySelectorAll('[teletransporte]:not(#maodireita):not(#pegadas2):not(#pegadas1)');
-    const todasPegadas = document.querySelectorAll('[teletransporte]');
+});
+</script>
 
-    function teletransportarPara(pos, manterDistancia=false, manterAltura=false, afastar=0.5, callback=null) {
-      if(emAnimacao) return;
-      emAnimacao = true;
-
-      const startPos = cameraRig.object3D.position.clone();
-      const targetPos = pos.clone();
-
-      if(manterDistancia) {
-        const pegPos = pegadasParede.object3D.position;
-        const distanciaParede = Math.abs(pegPos.x - 4.97);
-        targetPos.x = pos.x - distanciaParede;
-        targetPos.z = pos.z;
-      }
-
-      if(manterAltura) targetPos.y = pos.y;
-
-      const duration = 2000;
-      const startTime = performance.now();
-
-      function animate(time) {
-        const t = Math.min((time - startTime) / duration, 1);
-        cameraRig.object3D.position.lerpVectors(startPos, targetPos, t);
-        if(t < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          emAnimacao = false;
-          if(callback) callback();
-        }
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    // --- Fuse para mão direita ---
-    maodireita.addEventListener('mouseenter', () => {
-      if(emAnimacao) return;
-      maodireita.timeout = setTimeout(() => {
-        const camPos = cameraRig.object3D.position;
-        const pegPos = pegadasParede.object3D.position;
-        if(camPos.distanceTo(pegPos) < 0.5) {
-          outrasPegadas.forEach(p => p.dataset.inativo = 'true');
-          teletransportarPara(maodireita.object3D.position, true, true, 1.0, () => {
-            outrasPegadas.forEach(p => p.dataset.inativo = 'true');
-            pegadasParede.dataset.inativo = 'false';
-          });
-        }
-      }, 2000);
-    });
-    maodireita.addEventListener('mouseleave', () => clearTimeout(maodireita.timeout));
-
-    // --- Teletransporte normal das pegadas ---
-    todasPegadas.forEach(peg => {
-      peg.addEventListener('click', () => {
-        if(emAnimacao) return;
-        if(peg.dataset.inativo === 'true') return;
-
-        // Desativa teletransporte para a pegada da lousa se a câmera estiver na altura da mão
-        if(peg.id === 'pegadas1' && cameraRig.object3D.position.y >= 2) return;
-
-        teletransportarPara(peg.object3D.position);
-      });
-    });
-
-    // --- Reativar todos os teletransportes sobre pegadas da parede ---
-    pegadasParede.addEventListener('click', () => {
-      todasPegadas.forEach(p => p.dataset.inativo = 'false');
-    });
-
-    // --- Lousa e teclado condicionado ---
-    const lousa = document.querySelector('#lousa');
-    const imagem = document.querySelector('#imagem-ninho');
-    const teclado = document.querySelector('#teclado');
-    const textoDigitado = document.querySelector('#texto-digitado');
-    const tamanhoOriginal = { width: 1, height: 0.5 };
-    let tecladoCriado = false;
-    let finalizou = false;
-
-    AFRAME.registerComponent('interacao-lousa', {
-      init: function () {
-        this.el.addEventListener('mouseenter', () => {
-          if(finalizou) return;
-          const camPos = cameraRig.object3D.position;
-          const pegPos = pegadasLousa.object3D.position; 
-          if(camPos.distanceTo(pegPos) < 0.5) { 
-            this.timeout = setTimeout(() => {
-              imagem.setAttribute('visible', true);
-              textoDigitado.setAttribute('visible', true);
-              textoDigitado.setAttribute('value', '');
-              imagem.setAttribute('src', '#img-ninho');
-              imagem.setAttribute('width', tamanhoOriginal.width.toString());
-              imagem.setAttribute('height', tamanhoOriginal.height.toString());
-              imagem.setAttribute('position', '0 3 -4.9');
-
-              if (!tecladoCriado) {
-                criarTeclado();
-                tecladoCriado = true;
-              }
-
-              teclado.setAttribute('visible', true);
-            }, 2000);
-          }
-        });
-        this.el.addEventListener('mouseleave', () => clearTimeout(this.timeout));
-      }
-    });
-
-    function criarTeclado() {
-      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-      const espacamentoX = 0.3;
-      const espacamentoY = 0.3;
-      const startX = -6 * espacamentoX;
-      const startY = 1.9;
-      const corTecla = '#ffffff';
-      const opacidadeTecla = 0;
-
-      letras.forEach((letra, index) => {
-        const linha = index < 13 ? 0 : 1;
-        const col = index % 13;
-        const x = startX + col * espacamentoX;
-        const y = startY - linha * espacamentoY;
-
-        const plano = document.createElement('a-plane');
-        plano.setAttribute('width', 0.35);
-        plano.setAttribute('height', 0.35);
-        plano.setAttribute('color', corTecla);
-        plano.setAttribute('opacity', opacidadeTecla);
-        plano.setAttribute('position', `${x} ${y} -4.9`);
-
-        const letraText = document.createElement('a-text');
-        letraText.setAttribute('value', letra);
-        letraText.setAttribute('color', '#000');
-        letraText.setAttribute('align', 'center');
-        letraText.setAttribute('width', '2');
-        letraText.setAttribute('position', '0 0 0.02');
-
-        plano.appendChild(letraText);
-
-        plano.addEventListener('click', () => {
-          // Teclado só funciona se a câmera estiver sobre pegadas1
-          const camPos = cameraRig.object3D.position;
-          const pegPos = pegadasLousa.object3D.position;
-          if(finalizou || camPos.distanceTo(pegPos) > 0.5) return;
-
-          let textoAtual = textoDigitado.getAttribute('value');
-          if (!textoAtual.endsWith(letra)) {
-            textoDigitado.setAttribute('value', textoAtual + letra);
-          }
-        });
-
-        teclado.appendChild(plano);
-      });
-
-      criarBotaoExtra('Apagar', -1, startY - 2 * espacamentoY, () => {
-        const camPos = cameraRig.object3D.position;
-        const pegPos = pegadasLousa.object3D.position;
-        if(finalizou || camPos.distanceTo(pegPos) > 0.5) return;
-
-        let textoAtual = textoDigitado.getAttribute('value');
-        textoDigitado.setAttribute('value', textoAtual.slice(0, -1));
-      }, corTecla, opacidadeTecla);
-
-      criarBotaoExtra('Entrar', 1, startY - 2 * espacamentoY, () => {
-        const camPos = cameraRig.object3D.position;
-        const pegPos = pegadasLousa.object3D.position;
-        if(finalizou || camPos.distanceTo(pegPos) > 0.5) return;
-
-        const texto = textoDigitado.getAttribute('value').trim().toUpperCase();
-        if (texto === 'NINHO') {
-          imagem.setAttribute('src', '#img-estrela');
-          imagem.setAttribute('width', '1.7');
-          imagem.setAttribute('height', '1.5');
-          imagem.setAttribute('position', '0 2.8 -4.8');
-          textoDigitado.setAttribute('visible', false);
-          teclado.setAttribute('visible', false);
-          finalizou = true;
-        } else {
-          imagem.setAttribute('src', '#img-estrela-triste');
-          imagem.setAttribute('material', 'transparent: true');
-          imagem.setAttribute('width', '1.7');
-          imagem.setAttribute('height', '1.5');
-          imagem.setAttribute('position', '0 2.8 -4.8');
-          textoDigitado.setAttribute('visible', false);
-          setTimeout(() => {
-            imagem.setAttribute('src', '#img-ninho');
-            imagem.setAttribute('width', tamanhoOriginal.width.toString());
-            imagem.setAttribute('height', tamanhoOriginal.height.toString());
-            imagem.setAttribute('position', '0 3 -4.9');
-            textoDigitado.setAttribute('value', '');
-            textoDigitado.setAttribute('visible', true);
-            teclado.setAttribute('visible', true);
-          }, 3000);
-        }
-      }, corTecla, opacidadeTecla);
-    }
-
-    function criarBotaoExtra(texto, x, y, callback, cor, opacidade) {
-      const plano = document.createElement('a-plane');
-      plano.setAttribute('width', 1);
-      plano.setAttribute('height', 0.3);
-      plano.setAttribute('color', cor);
-      plano.setAttribute('opacity', opacidade);
-      plano.setAttribute('position', `${x} ${y} -4.9`);
-
-      const textoEntity = document.createElement('a-text');
-      textoEntity.setAttribute('value', texto);
-      textoEntity.setAttribute('align', 'center');
-      textoEntity.setAttribute('color', '#000');
-      textoEntity.setAttribute('width', '2');
-      textoEntity.setAttribute('position', '0 0 0.02');
-
-      plano.appendChild(textoEntity);
-      plano.addEventListener('click', callback);
-      teclado.appendChild(plano);
-    }
-  </script>
 </body>
 </html>
