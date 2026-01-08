@@ -5,6 +5,59 @@
   <title>Sala 360A</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
+
+  <script>
+  // --- TELETRANSPORTE E GAZE ---
+  let emAnimacao = false;
+  const cameraRig = document.querySelector('#cameraRig');
+  const maodireita = document.querySelector('#maodireita');
+  const pegadasParede = document.querySelector('#pegadas2');
+  const pegadasLousa = document.querySelector('#pegadas1');
+  const todasPegadas = document.querySelectorAll('[teletransporte]');
+
+  function teletransportarPara(pos) {
+    if (emAnimacao) return;
+    emAnimacao = true;
+
+    const start = cameraRig.object3D.position.clone();
+    const target = pos.clone();
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function animar(t) {
+      const k = Math.min((t - startTime) / duration, 1);
+      cameraRig.object3D.position.lerpVectors(start, target, k);
+      if (k < 1) requestAnimationFrame(animar);
+      else emAnimacao = false;
+    }
+
+    requestAnimationFrame(animar);
+  }
+
+  todasPegadas.forEach(p => {
+    p.addEventListener('click', () => {
+      if (emAnimacao) return;
+      teletransportarPara(p.object3D.position);
+    });
+  });
+
+  // --- GAZE NA LOUZA ---
+  AFRAME.registerComponent('interacao-lousa', {
+    init: function () {
+      this.el.addEventListener('mouseenter', () => {
+        this.timeout = setTimeout(() => {
+          document.querySelector('#imagem-ninho').setAttribute('visible', true);
+          document.querySelector('#texto-digitado').setAttribute('visible', true);
+        }, 2000);
+      });
+      this.el.addEventListener('mouseleave', () => {
+        clearTimeout(this.timeout);
+      });
+    }
+  });
+</script>
+
+  
 <body>
   <a-scene>
     <a-assets>
