@@ -61,20 +61,26 @@
     <a-image src="nuvem2.png" width="2" height="1.7" position="3 4.5 -4.93"></a-image>
     <a-image src="nuvem2.png" width="2" height="1.7" position="-3 4.5 -4.93"></a-image>
 
-    <!-- ✅ ROBÔ – ÚNICA ALTERAÇÃO -->
     <a-entity
-      id="roboEducacional"
-      gltf-model="#modeloRobo"
-      position="-2.2 2.0 2.5"
-      rotation="0 45 0"
-      scale="1.5 1.5 1.5"
-      animation="property: position;
-                 dir: alternate;
-                 dur: 4000;
-                 easing: easeInOutSine;
-                 loop: true;
-                 to: -2.2 1.7 1.6">
-    </a-entity>
+  id="roboWrapper"
+  position="-2.2 2.0 2.5"
+  rotation="0 180 0">
+
+  <a-entity
+    id="roboEducacional"
+    gltf-model="#modeloRobo"
+    rotation="0 -90 0"
+    scale="1.5 1.5 1.5"
+    animation="property: position;
+               dir: alternate;
+               dur: 4000;
+               easing: easeInOutSine;
+               loop: true;
+               to: 0 0.3 0">
+  </a-entity>
+
+</a-entity>
+
 
     <!-- Parede de escalada -->
     <a-image src="#img-climbing" width="8" height="5" position="4.97 2.5 0" rotation="0 -90 0"></a-image>
