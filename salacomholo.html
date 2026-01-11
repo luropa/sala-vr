@@ -5,188 +5,130 @@
   <title>Sala 360A</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
-
 <body>
 <a-scene>
 
-  <a-assets>
-    <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
-    <a-asset-item id="modeloRobo" src="3d+robot+model.glb"></a-asset-item>
+<a-assets>
+  <a-asset-item id="modeloCadeira" src="cadeira_final.glb"></a-asset-item>
+  <a-asset-item id="modeloRobo" src="3d+robot+model.glb"></a-asset-item>
 
-    <img id="img-ninho" src="palavraninho.png" />
-    <img id="img-estrela" src="estrelacontente.png" />
-    <img id="img-estrela-triste" src="estrelatriste.png" />
-    <img id="velha" src="jvelha.jpg" />
-    <img id="jogo" src="brinquedo educativo2.png" />
-    <img id="img-climbing" src="parededeescalada1.png" />
-    <img id="img-maoesquerda" src="maoesquerda.png" />
-    <img id="img-maodireita" src="maodireita.png" />
-  </a-assets>
+  <img id="img-ninho" src="palavraninho.png" />
+  <img id="img-estrela" src="estrelacontente.png" />
+  <img id="img-estrela-triste" src="estrelatriste.png" />
+  <img id="velha" src="jvelha.jpg" /> 
+  <img id="jogo" src="brinquedo educativo2.png" />
+  <img id="img-climbing" src="parededeescalada1.png" />
+  <img id="img-maoesquerda" src="maoesquerda.png" /> 
+  <img id="img-maodireita" src="maodireita.png" /> 
+</a-assets>
 
-  <a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
+<a-light type="ambient" color="#ffffff" intensity="1.2"></a-light>
 
-  <!-- Piso e paredes -->
-  <a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0"></a-plane>
-  <a-plane width="10" height="5" position="0 2.5 -5"></a-plane>
-  <a-plane width="10" height="5" position="0 2.5 5" rotation="0 180 0"></a-plane>
-  <a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0"></a-plane>
-  <a-plane width="10" height="5" position="5 2.5 0" rotation="0 -90 0"></a-plane>
+<a-plane src="piso1.png" width="10" height="10" rotation="-90 0 0"></a-plane>
 
-  <!-- Lousa -->
-  <a-image id="lousa" interacao-lousa src="lousaembranco2.png"
-           width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
+<a-plane width="10" height="5" position="0 2.5 -5" material="src: paredeerodape2.png"></a-plane>
+<a-plane width="10" height="5" position="-5 2.5 0" rotation="0 90 0" material="src: paredeerodape2.png"></a-plane>
 
-  <a-image id="imagem-ninho" src="#img-ninho"
-           width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
+<a-image id="lousa" interacao-lousa src="lousaembranco2.png"
+  width="5.6" height="3.1" position="0 2.5 -4.95"></a-image>
 
-  <a-text id="texto-digitado" value=""
-          position="0 2.5 -4.9" color="#000"
-          align="center" width="3" visible="false"></a-text>
+<a-image id="imagem-ninho" src="#img-ninho"
+  width="1" height="0.5" position="0 3 -4.9" visible="false"></a-image>
 
-  <a-entity id="teclado" visible="false"></a-entity>
+<a-text id="texto-digitado" value=""
+  position="0 2.5 -4.9" color="#000"
+  align="center" width="3" visible="false"></a-text>
 
-  <!-- ROBÔ Rolo -->
-  <a-entity id="robo"
-    gltf-model="#modeloRobo"
-    position="-4.2 1.6 -4.2"
-    rotation="0 310 0"
-    scale="2.5 2.5 2.5"
-    animation__float="property: position;
-                      dir: alternate;
-                      dur: 3000;
-                      easing: easeInOutSine;
-                      loop: true;
-                      to: -4.2 2.0 -4.2">
-  </a-entity>
+<a-entity id="teclado" visible="false"></a-entity>
 
-  <!-- Câmera + gaze -->
-  <a-entity id="cameraRig" position="0 0.5 4">
-    <a-camera>
-      <a-cursor fuse="true" fuse-timeout="2000" color="red"
-        geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02">
-      </a-cursor>
-    </a-camera>
-  </a-entity>
+<!-- ROBÔ Rolo -->
+<a-entity id="robo"
+  gltf-model="#modeloRobo"
+  position="-4.2 1.6 -4.2"
+  rotation="0 310 0"
+  scale="2.5 2.5 2.5"
+  animation="property: position;
+             dir: alternate;
+             dur: 3000;
+             easing: easeInOutSine;
+             loop: true;
+             to: -4.2 2.0 -4.2">
+</a-entity>
+
+<!-- CÂMERA -->
+<a-entity id="cameraRig" position="0 0.5 4">
+  <a-camera>
+    <a-cursor fuse="true" fuse-timeout="2000" color="red"
+      geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02">
+    </a-cursor>
+  </a-camera>
+</a-entity>
 
 </a-scene>
 
 <script>
-/* ================= DIALOGO DO ROBÔ ================= */
+/* ================= ROBÔ ROLO – DIÁLOGO ================= */
 
-let nomeUsuario = "";
 let etapa = 0;
+let nomeUsuario = "";
 
-function falar(txt) {
-  const f = new SpeechSynthesisUtterance(txt);
-  f.lang = "pt-BR";
+function falar(txt){
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = "pt-BR";
   speechSynthesis.cancel();
-  speechSynthesis.speak(f);
+  speechSynthesis.speak(u);
 }
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const reconhecimento = new SpeechRecognition();
-reconhecimento.lang = "pt-BR";
-reconhecimento.interimResults = false;
+const rec = new SpeechRecognition();
+rec.lang = "pt-BR";
+rec.interimResults = false;
 
-reconhecimento.onresult = e => {
-  let fala = e.results[0][0].transcript.toLowerCase();
+rec.onresult = e => {
+  const fala = e.results[0][0].transcript.toLowerCase();
 
-  // remove palavras comuns
-  fala = fala.replace(/meu nome é|meu nome|eu sou|eu me chamo|sou o|sou a/g, "").trim();
+  if(etapa === 0){
+    nomeUsuario = fala.replace(/meu nome é|eu sou|me chamo/g,'').trim().split(" ").pop();
+    nomeUsuario = nomeUsuario.charAt(0).toUpperCase()+nomeUsuario.slice(1);
 
-  // pega a última palavra como nome
-  nomeUsuario = fala.split(" ").pop();
+    falar(`Prazer, ${nomeUsuario}. Que palavra está escrita na lousa?`);
+    etapa = 1;
 
-  // capitaliza
-  nomeUsuario = nomeUsuario.charAt(0).toUpperCase() + nomeUsuario.slice(1);
+    setTimeout(()=>rec.start(),4000);
+    return;
+  }
 
-  falar(`Prazer, ${nomeUsuario}!`);
-
-  setTimeout(() => {
-    falar(`${nomeUsuario}, que palavra está escrita na lousa?`);
-  }, 2000);
-
-  setTimeout(() => {
+  if(etapa === 1){
     falar("Você poderia digitá-la no teclado virtual e depois olhar fixamente para o botão Entrar para a gente ver se você acertou?");
-  }, 5000);
-
-  etapa = 2;
+    etapa = 2;
+  }
 };
 
-
-const robo = document.querySelector("#robo");
-
-robo.addEventListener("mouseenter", () => {
-  if (etapa === 0) {
+document.querySelector('#robo').addEventListener('mouseenter',()=>{
+  if(etapa===0){
     falar("Olá, eu sou Rolo e você?");
-    etapa = 1;
-    setTimeout(() => reconhecimento.start(), 2500);
+    setTimeout(()=>rec.start(),2500);
   }
 });
 
-function roboEmpolgado() {
+/* ===== REAÇÃO AO RESULTADO ===== */
+function roboEmpolgado(){
   falar(`Muito bem, ${nomeUsuario}! Você acertou!`);
-  robo.setAttribute("animation__happy",
-    "property: rotation; dir: alternate; dur: 500; loop: 4; to: 0 360 0");
 }
 
-function roboIncentiva() {
+function roboIncentiva(){
   falar("Não desanime, tente outra vez!");
-  robo.setAttribute("animation__sad",
-    "property: position; dir: alternate; dur: 300; loop: 3; to: -4.1 1.6 -4.2");
 }
 
-/* ================= LÓGICA DO TECLADO ================= */
-
-const imagem = document.querySelector("#imagem-ninho");
-const teclado = document.querySelector("#teclado");
-const textoDigitado = document.querySelector("#texto-digitado");
-
-AFRAME.registerComponent("interacao-lousa", {
-  init() {
-    this.el.addEventListener("mouseenter", () => {
-      imagem.setAttribute("visible", true);
-      textoDigitado.setAttribute("visible", true);
-      textoDigitado.setAttribute("value", "");
-      teclado.setAttribute("visible", true);
-      if (!teclado.hasChildNodes()) criarTeclado();
-    });
-  }
-});
-
-function criarTeclado() {
-  "NINHO".split("").forEach((l, i) => {
-    const t = document.createElement("a-text");
-    t.setAttribute("value", l);
-    t.setAttribute("position", `${-0.6 + i * 0.3} 1.8 -4.9`);
-    t.setAttribute("color", "#000");
-    t.addEventListener("click", () => {
-      textoDigitado.setAttribute("value",
-        textoDigitado.getAttribute("value") + l);
-    });
-    teclado.appendChild(t);
-  });
-
-  const entrar = document.createElement("a-text");
-  entrar.setAttribute("value", "ENTRAR");
-  entrar.setAttribute("position", "0 1.4 -4.9");
-  entrar.setAttribute("color", "#000");
-  entrar.addEventListener("click", () => {
-    if (textoDigitado.getAttribute("value") === "NINHO") {
-      imagem.setAttribute("src", "#img-estrela");
-      teclado.setAttribute("visible", false);
-      textoDigitado.setAttribute("visible", false);
-      roboEmpolgado();
-    } else {
-      imagem.setAttribute("src", "#img-estrela-triste");
-      roboIncentiva();
-      setTimeout(() => {
-        imagem.setAttribute("src", "#img-ninho");
-        textoDigitado.setAttribute("value", "");
-      }, 3000);
-    }
-  });
-  teclado.appendChild(entrar);
+/* ===== GANCHO COM LÓGICA EXISTENTE ===== */
+const originalEntrar = criarBotaoExtra;
+criarBotaoExtra = function(texto,x,y,callback,cor,opacidade){
+  originalEntrar(texto,x,y,()=>{
+    const valor = document.querySelector('#texto-digitado').getAttribute('value');
+    if(valor === 'NINHO') roboEmpolgado();
+    else roboIncentiva();
+    callback();
+  },cor,opacidade);
 }
 </script>
 
