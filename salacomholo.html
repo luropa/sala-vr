@@ -91,7 +91,7 @@ rec.onresult = e => {
     nomeUsuario = fala.replace(/meu nome é|eu sou|me chamo/g,'').trim().split(" ").pop();
     nomeUsuario = nomeUsuario.charAt(0).toUpperCase()+nomeUsuario.slice(1);
 
-    falar(`Prazer, ${nomeUsuario}. Que palavra está escrita na lousa?`);
+    falar(`Prazer, ${nomeUsuario}. Olhe para a lousa e me diga que palavra está escrita nela?`);
     etapa = 1;
 
     setTimeout(()=>rec.start(),4000);
