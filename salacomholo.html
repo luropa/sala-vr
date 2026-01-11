@@ -89,13 +89,30 @@ reconhecimento.lang = "pt-BR";
 reconhecimento.interimResults = false;
 
 reconhecimento.onresult = e => {
-  nomeUsuario = e.results[0][0].transcript.split(" ")[0];
-  falar(`${nomeUsuario}, que palavra está escrita na lousa?`);
+  let fala = e.results[0][0].transcript.toLowerCase();
+
+  // remove palavras comuns
+  fala = fala.replace(/meu nome é|meu nome|eu sou|eu me chamo|sou o|sou a/g, "").trim();
+
+  // pega a última palavra como nome
+  nomeUsuario = fala.split(" ").pop();
+
+  // capitaliza
+  nomeUsuario = nomeUsuario.charAt(0).toUpperCase() + nomeUsuario.slice(1);
+
+  falar(`Prazer, ${nomeUsuario}!`);
+
+  setTimeout(() => {
+    falar(`${nomeUsuario}, que palavra está escrita na lousa?`);
+  }, 2000);
+
   setTimeout(() => {
     falar("Você poderia digitá-la no teclado virtual e depois olhar fixamente para o botão Entrar para a gente ver se você acertou?");
-  }, 3500);
+  }, 5000);
+
   etapa = 2;
 };
+
 
 const robo = document.querySelector("#robo");
 
