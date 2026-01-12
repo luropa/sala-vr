@@ -334,7 +334,9 @@
     }
   </script>
   <script>
-  const robo = document.querySelector('#robo');
+  const cameraRig = document.querySelector('#cameraRig');
+  const pegadasLousa = document.querySelector('#pegadas1');
+
 
   const reconhecimento = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   reconhecimento.lang = 'pt-BR';
@@ -353,14 +355,19 @@
     speechSynthesis.speak(fala);
   }
 
-  robo.addEventListener('mouseenter', () => {
-    if (etapa !== 0) return;
+robo.addEventListener('mouseenter', () => {
 
-    etapa = 1;
-    falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
-      reconhecimento.start();
-    });
+  // 🔒 trava gaze fora das pegadas da lousa
+  if (!usuarioEstaNasPegadasDaLousa()) return;
+
+  if (etapa !== 0) return;
+
+  etapa = 1;
+  falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
+    reconhecimento.start();
   });
+});
+
 
   reconhecimento.onresult = (event) => {
     const resposta = event.results[0][0].transcript.trim();
@@ -400,6 +407,11 @@
     falar('Não desanime, tente outra vez!');
   }
 
+function usuarioEstaNasPegadasDaLousa() {
+  const camPos = cameraRig.object3D.position;
+  const pegPos = pegadasLousa.object3D.position;
+  return camPos.distanceTo(pegPos) < 0.6;
+}
 
     
 </script>
