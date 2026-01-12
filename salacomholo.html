@@ -78,7 +78,7 @@
              dur: 3000;
              easing: easeInOutSine;
              loop: true;
-             to: -4.2 2.0 -4.2">
+             to: -4.2 2.0 -4.2">>
 </a-entity>
 
 
@@ -102,8 +102,6 @@
       id="cursor"
       fuse="true"
       fuse-timeout="1500"
-        raycaster="objects: .interativo"
-
       color="red">
     </a-cursor>
   </a-camera>
@@ -336,9 +334,7 @@
     }
   </script>
   <script>
-  const cameraRig = document.querySelector('#cameraRig');
-  const pegadasLousa = document.querySelector('#pegadas1');
-
+  const robo = document.querySelector('#robo');
 
   const reconhecimento = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   reconhecimento.lang = 'pt-BR';
@@ -357,32 +353,14 @@
     speechSynthesis.speak(fala);
   }
 
-robo.addEventListener('mouseenter', () => {
-  if (etapa !== 0) return;
+  robo.addEventListener('mouseenter', () => {
+    if (etapa !== 0) return;
 
-  const camPos = cameraRig.object3D.position;
-  const pegPos = pegadasLousa.object3D.position;
-
-  // Só ativa o robô se o usuário estiver sobre as pegadas da lousa
-  if (camPos.distanceTo(pegPos) > 0.6) return;
-
-  etapa = 1;
-  falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
-    reconhecimento.start();
+    etapa = 1;
+    falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
+      reconhecimento.start();
+    });
   });
-});
-
-  // 🔒 trava gaze fora das pegadas da lousa
-  if (!usuarioEstaNasPegadasDaLousa()) return;
-
-  if (etapa !== 0) return;
-
-  etapa = 1;
-  falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
-    reconhecimento.start();
-  });
-});
-
 
   reconhecimento.onresult = (event) => {
     const resposta = event.results[0][0].transcript.trim();
@@ -422,11 +400,6 @@ robo.addEventListener('mouseenter', () => {
     falar('Não desanime, tente outra vez!');
   }
 
-function usuarioEstaNasPegadasDaLousa() {
-  const camPos = cameraRig.object3D.position;
-  const pegPos = pegadasLousa.object3D.position;
-  return camPos.distanceTo(pegPos) < 0.6;
-}
 
     
 </script>
