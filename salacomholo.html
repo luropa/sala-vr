@@ -357,7 +357,7 @@
     if (etapa !== 0) return;
 
     etapa = 1;
-    falar('Olá, eu sou Rolo. E você?', () => {
+    falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
       reconhecimento.start();
     });
   });
@@ -369,7 +369,7 @@
       nomeUsuario = resposta;
       etapa = 2;
 
-      falar(`${nomeUsuario}, que palavra está escrita na lousa?`, () => {
+      falar(`Prazer, ${nomeUsuario}! Agora me diga: que palavra está escrita na lousa?`, () => {
         reconhecimento.start();
       });
 
