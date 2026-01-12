@@ -74,12 +74,12 @@
   rotation="0 310 0"
   scale="2.5 2.5 2.5"
   visible="false"
-  animation="property: position;
+  /animation="property: position;
              dir: alternate;
              dur: 3000;
              easing: easeInOutSine;
              loop: true;
-             to: -4.2 2.0 -4.2">>
+             to: -4.2 2.0 -4.2">>/
 </a-entity>
 
 
@@ -446,7 +446,53 @@ function aparecerRoboComEfeitoTV() {
   }
 
 
-    
+  const robo = document.querySelector('#robo');
+let roboApareceu = false;
+
+function aparecerRoboComEfeitoTV() {
+  if (roboApareceu) return;
+  roboApareceu = true;
+
+  console.log("🤖 Robô aparecendo!");
+
+  robo.setAttribute('visible', true);
+
+  // começa "desregulado"
+  robo.setAttribute('scale', '0.05 3 0.05');
+
+  // efeito de sintonia (glitch vertical)
+  robo.setAttribute('animation__sintonia', {
+    property: 'scale',
+    dur: 120,
+    dir: 'alternate',
+    loop: 8,
+    to: '2.5 2.0 2.5'
+  });
+
+  // estabiliza
+  setTimeout(() => {
+    robo.removeAttribute('animation__sintonia');
+
+    robo.setAttribute('animation__normaliza', {
+      property: 'scale',
+      dur: 600,
+      easing: 'easeOutElastic',
+      to: '2.5 2.5 2.5'
+    });
+
+    // flutuação suave FINAL
+    robo.setAttribute('animation__flutuar', {
+      property: 'position',
+      dir: 'alternate',
+      dur: 3000,
+      easing: 'easeInOutSine',
+      loop: true,
+      to: '-4.2 2.0 -4.2'
+    });
+
+  }, 1000);
+}
+  
 </script>
 
 </body>
