@@ -358,6 +358,19 @@
   }
 
 robo.addEventListener('mouseenter', () => {
+  if (etapa !== 0) return;
+
+  const camPos = cameraRig.object3D.position;
+  const pegPos = pegadasLousa.object3D.position;
+
+  // Só ativa o robô se o usuário estiver sobre as pegadas da lousa
+  if (camPos.distanceTo(pegPos) > 0.6) return;
+
+  etapa = 1;
+  falar('Olá, eu sou Rolo. Qual é o seu nome?', () => {
+    reconhecimento.start();
+  });
+});
 
   // 🔒 trava gaze fora das pegadas da lousa
   if (!usuarioEstaNasPegadasDaLousa()) return;
