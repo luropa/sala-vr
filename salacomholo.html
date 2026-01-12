@@ -73,6 +73,7 @@
   position="-4.2 1.4 -4.2"
   rotation="0 310 0"
   scale="2.5 2.5 2.5"
+  visible="false"
   animation="property: position;
              dir: alternate;
              dur: 3000;
@@ -108,6 +109,45 @@
 </a-entity>
 
   </a-scene>
+  const robo = document.querySelector('#robo');
+let roboApareceu = false;
+
+function aparecerRoboComEfeitoTV() {
+  if (roboApareceu) return;
+  roboApareceu = true;
+
+  robo.setAttribute('visible', true);
+
+  // começa pequeno e "bugado"
+  robo.setAttribute('scale', '0.1 2.8 0.1');
+  robo.setAttribute('material', 'opacity: 0.2');
+
+  // glitch vertical
+  robo.setAttribute('animation__glitch', {
+    property: 'scale',
+    dur: 120,
+    loop: 6,
+    dir: 'alternate',
+    to: '2.5 2.2 2.5'
+  });
+
+  // fade in
+  robo.setAttribute('animation__fade', {
+    property: 'material.opacity',
+    dur: 800,
+    easing: 'easeOutQuad',
+    to: 1
+  });
+
+  // estabiliza tamanho
+  robo.setAttribute('animation__scale', {
+    property: 'scale',
+    dur: 800,
+    easing: 'easeOutElastic',
+    to: '2.5 2.5 2.5'
+  });
+}
+
 <script>
     // --- Teletransporte suave e pegadas ---
     let emAnimacao = false;
@@ -177,7 +217,12 @@
         // Desativa teletransporte para a pegada da lousa se a câmera estiver na altura da mão
         if(peg.id === 'pegadas1' && cameraRig.object3D.position.y >= 2) return;
 
-        teletransportarPara(peg.object3D.position);
+        teletransportarPara(peg.object3D.position, false, false, 0.5, () => {
+  if (peg.id === 'pegadas1') {
+    aparecerRoboComEfeitoTV();
+  }
+});
+
       });
     });
 
